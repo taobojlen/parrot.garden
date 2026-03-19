@@ -16,7 +16,7 @@ const parser = new XMLParser({
   processEntities: false, // We handle entity decoding manually to avoid double-decoding
 })
 
-function decodeEntities(text: string): string {
+function decodeEntitiesOnce(text: string): string {
   return text
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
     .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
@@ -24,6 +24,11 @@ function decodeEntities(text: string): string {
     .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&') // Must be last to avoid double-decoding
+}
+
+function decodeEntities(text: string): string {
+  // Decode twice to handle double-encoded entities (e.g. &amp;gt; → &gt; → >)
+  return decodeEntitiesOnce(decodeEntitiesOnce(text))
 }
 
 function stripHtml(html: string): string {
@@ -44,11 +49,11 @@ function parseRssItems(channel: any): FeedItem[] {
   const items = Array.isArray(channel.item) ? channel.item : channel.item ? [channel.item] : []
   return items.map((item: any) => ({
     guid: item.guid?.['#text'] ?? item.guid ?? item.link ?? '',
-    title: item.title ?? '',
+    title: decodeEntities(String(item.title ?? '')),
     link: item.link ?? '',
     description: item.description ? stripHtml(String(item.description)) : '',
     content: item['content:encoded'] ? stripHtml(String(item['content:encoded'])) : '',
-    author: item.author ?? item['dc:creator'] ?? '',
+    author: decodeEntities(String(item.author ?? item['dc:creator'] ?? '')),
     pubDate: toISODate(item.pubDate),
   }))
 }
@@ -61,11 +66,11 @@ function parseAtomEntries(feed: any): FeedItem[] {
       : entry.link?.['@_href'] ?? entry.link ?? ''
     return {
       guid: entry.id ?? link ?? '',
-      title: entry.title?.['#text'] ?? entry.title ?? '',
+      title: decodeEntities(String(entry.title?.['#text'] ?? entry.title ?? '')),
       link,
       description: entry.summary ? stripHtml(String(entry.summary?.['#text'] ?? entry.summary)) : '',
       content: entry.content ? stripHtml(String(entry.content?.['#text'] ?? entry.content)) : '',
-      author: entry.author?.name ?? '',
+      author: decodeEntities(String(entry.author?.name ?? '')),
       pubDate: toISODate(entry.updated ?? entry.published),
     }
   })
