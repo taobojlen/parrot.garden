@@ -23,5 +23,8 @@ logs
 .env.*
 !.env.example
 
+# Wrangler
+.wrangler
+
 # Superpowers brainstorming
 .superpowers
