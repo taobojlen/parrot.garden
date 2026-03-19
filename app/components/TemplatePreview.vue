@@ -64,6 +64,19 @@
       </div>
     </div>
     <p v-else class="py-4 text-center text-sm text-neutral-400">No items in feed</p>
+
+    <UModal v-model:open="confirmOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="font-semibold text-lg">Confirm post</h3>
+          <p class="text-sm text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">{{ confirmText }}</p>
+          <div class="flex justify-end gap-2">
+            <UButton variant="ghost" @click="confirmOpen = false">Cancel</UButton>
+            <UButton color="primary" icon="i-lucide-send" :loading="postingIndex !== null" @click="confirmAndPost">Post</UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </UCard>
 </template>
 
@@ -122,8 +135,23 @@ const postingIndex = ref<number | null>(null)
 const postedIndices = ref(new Set<number>())
 const postResults = ref<Record<number, { success?: boolean; error?: string }>>({})
 
-async function handlePost(index: number) {
+const confirmOpen = ref(false)
+const pendingPostIndex = ref<number | null>(null)
+const confirmText = computed(() => {
+  if (pendingPostIndex.value === null) return ''
+  return previewItems.value[pendingPostIndex.value]?.rendered ?? ''
+})
+
+function handlePost(index: number) {
   if (!props.connectionId) return
+  pendingPostIndex.value = index
+  confirmOpen.value = true
+}
+
+async function confirmAndPost() {
+  const index = pendingPostIndex.value
+  if (index === null || !props.connectionId) return
+  confirmOpen.value = false
   postingIndex.value = index
   postResults.value[index] = {}
   try {
@@ -137,6 +165,7 @@ async function handlePost(index: number) {
     postResults.value[index] = { error: e.data?.statusMessage || 'Failed to post' }
   } finally {
     postingIndex.value = null
+    pendingPostIndex.value = null
   }
 }
 
