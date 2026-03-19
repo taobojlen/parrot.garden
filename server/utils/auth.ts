@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { magicLink } from 'better-auth/plugins'
+import { Resend } from 'resend'
 
 let _auth: ReturnType<typeof betterAuth>
 
@@ -13,8 +14,19 @@ export function serverAuth() {
       plugins: [
         magicLink({
           sendMagicLink: async ({ email, url }) => {
-            // TODO: integrate email service for production
-            console.log(`[Magic Link] Send to ${email}: ${url}`)
+            const config = useRuntimeConfig()
+            if (!config.resendApiKey) {
+              // Dev fallback
+              console.log(`[Magic Link] Send to ${email}: ${url}`)
+              return
+            }
+            const resend = new Resend(config.resendApiKey)
+            await resend.emails.send({
+              from: config.resendFromEmail || 'Parrot <noreply@parrot.app>',
+              to: email,
+              subject: 'Sign in to Parrot',
+              html: `<p>Click the link below to sign in to Parrot:</p><p><a href="${url}">Sign in</a></p><p>This link expires in 5 minutes.</p>`,
+            })
           },
         }),
       ],

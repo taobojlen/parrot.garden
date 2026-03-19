@@ -18,7 +18,11 @@ export default defineNuxtConfig({
     },
   },
   hub: {
-    db: 'sqlite',
+    db: {
+      dialect: 'sqlite',
+      driver: 'd1',
+      connection: { databaseId: '7d8c14ce-b905-4974-aced-b700006eff96' },
+    },
   },
   nitro: {
     experimental: {
@@ -27,9 +31,18 @@ export default defineNuxtConfig({
     scheduledTasks: {
       '*/5 * * * *': ['feed:poll'],
     },
+    cloudflare: {
+      wrangler: {
+        triggers: {
+          crons: ['*/5 * * * *'],
+        },
+      },
+    },
   },
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
+    resendApiKey: '',
+    resendFromEmail: '',
   },
 })
