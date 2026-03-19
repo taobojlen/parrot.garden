@@ -1,40 +1,49 @@
 <template>
   <div class="mx-auto max-w-lg">
-    <h1 class="text-2xl font-bold mb-6">Edit Connection</h1>
+    <div class="flex items-center gap-2 mb-6">
+      <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
+      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Edit Connection</h1>
+    </div>
     <UCard>
-      <form @submit.prevent="handleSubmit">
+      <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
-          <UFormField label="Source">
-            <UInput :value="connection?.sourceName" disabled />
+          <UFormField label="Source" name="source">
+            <UInput :model-value="connection?.sourceName" disabled icon="i-lucide-rss" />
           </UFormField>
-          <UFormField label="Target">
-            <UInput :value="connection ? `${connection.targetName} (${connection.targetType})` : ''" disabled />
+          <UFormField label="Target" name="target">
+            <UInput :model-value="connection ? `${connection.targetName} (${connection.targetType})` : ''" disabled icon="i-lucide-share-2" />
           </UFormField>
-          <UFormField label="Template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
+          <USeparator />
+          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
             <UTextarea v-model="form.template" :rows="3" />
           </UFormField>
-          <UFormField label="Status">
-            <div class="flex items-center gap-3">
-              <UToggle v-model="form.enabled" />
-              <span class="text-sm">{{ form.enabled ? 'Active' : 'Paused' }}</span>
-            </div>
+          <UFormField label="Status" name="enabled">
+            <USwitch v-model="form.enabled" label="Active" :description="form.enabled ? 'Connection is active and will cross-post new items' : 'Connection is paused'" />
           </UFormField>
         </div>
-        <div class="flex gap-2 mt-6">
+        <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="saving">Save Changes</UButton>
-          <NuxtLink to="/dashboard"><UButton variant="ghost">Cancel</UButton></NuxtLink>
+          <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
+          <div class="flex-1" />
           <UButton
-            class="ml-auto"
             color="error"
-            variant="ghost"
+            variant="soft"
             :loading="deleting"
+            icon="i-lucide-trash-2"
             @click="handleDelete"
           >
             Delete
           </UButton>
         </div>
-        <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
-      </form>
+      </UForm>
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        :title="error"
+        class="mt-4"
+      />
     </UCard>
   </div>
 </template>

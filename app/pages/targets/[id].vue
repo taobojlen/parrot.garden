@@ -1,39 +1,51 @@
 <template>
   <div class="mx-auto max-w-lg">
-    <h1 class="text-2xl font-bold mb-6">Edit Target</h1>
+    <div class="flex items-center gap-2 mb-6">
+      <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
+      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Edit Target</h1>
+    </div>
     <UCard>
-      <form @submit.prevent="handleSubmit">
+      <UForm :state="formState" @submit="handleSubmit">
         <div class="space-y-4">
-          <UFormField label="Name">
-            <UInput v-model="form.name" placeholder="My Bluesky" required />
+          <UFormField label="Name" name="name" required>
+            <UInput v-model="form.name" placeholder="My Bluesky" icon="i-lucide-type" required />
           </UFormField>
-          <UFormField label="Type">
-            <USelect v-model="form.type" :items="targetTypes" required />
+          <UFormField label="Type" name="type" required>
+            <USelect v-model="form.type" :items="targetTypes" value-key="value" required />
           </UFormField>
           <template v-if="form.type === 'bluesky'">
-            <UFormField label="Handle" hint="Leave blank to keep existing credentials">
-              <UInput v-model="credentials.handle" placeholder="Enter new handle to update" />
+            <USeparator label="Update Credentials" />
+            <UFormField label="Handle" name="handle" hint="Leave blank to keep existing credentials">
+              <UInput v-model="credentials.handle" placeholder="Enter new handle to update" icon="i-lucide-at-sign" />
             </UFormField>
-            <UFormField label="App Password" hint="Leave blank to keep existing credentials">
-              <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" />
+            <UFormField label="App Password" name="appPassword" hint="Leave blank to keep existing credentials">
+              <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" icon="i-lucide-key-round" />
             </UFormField>
           </template>
         </div>
-        <div class="flex gap-2 mt-6">
+        <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="saving">Save Changes</UButton>
-          <NuxtLink to="/dashboard"><UButton variant="ghost">Cancel</UButton></NuxtLink>
+          <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
+          <div class="flex-1" />
           <UButton
-            class="ml-auto"
             color="error"
-            variant="ghost"
+            variant="soft"
             :loading="deleting"
+            icon="i-lucide-trash-2"
             @click="handleDelete"
           >
             Delete
           </UButton>
         </div>
-        <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
-      </form>
+      </UForm>
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        :title="error"
+        class="mt-4"
+      />
     </UCard>
   </div>
 </template>
@@ -53,6 +65,8 @@ const form = reactive({
 
 // Credentials are never returned by the API; only send if the user fills them in
 const credentials = reactive({ handle: '', appPassword: '' })
+
+const formState = computed(() => ({ ...form, ...credentials }))
 
 const saving = ref(false)
 const deleting = ref(false)

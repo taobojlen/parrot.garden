@@ -1,29 +1,53 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">Post Log</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Post Log</h1>
+      <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="refresh">
+        Refresh
+      </UButton>
+    </div>
     <UCard>
-      <UTable :data="logs || []" :columns="columns">
+      <UTable
+        :data="logs || []"
+        :columns="columns"
+        :empty="{ icon: 'i-lucide-scroll-text', label: 'No posts yet' }"
+        :loading="status === 'pending'"
+      >
         <template #status-cell="{ row }">
           <UBadge
             :color="row.original.status === 'posted' ? 'success' : row.original.status === 'failed' ? 'error' : 'neutral'"
-            variant="subtle">
+            variant="subtle"
+            size="sm"
+          >
             {{ row.original.status }}
           </UBadge>
         </template>
+        <template #error-cell="{ row }">
+          <span v-if="row.original.error" class="text-sm text-(--ui-text-muted) truncate max-w-48 block">
+            {{ row.original.error }}
+          </span>
+          <span v-else class="text-sm text-(--ui-text-dimmed)">&mdash;</span>
+        </template>
         <template #actions-cell="{ row }">
-          <UButton v-if="row.original.status === 'failed'" size="xs" variant="ghost"
-            :loading="retrying === row.original.id" @click="retry(row.original.id)">
+          <UButton
+            v-if="row.original.status === 'failed'"
+            size="xs"
+            variant="soft"
+            color="warning"
+            icon="i-lucide-rotate-ccw"
+            :loading="retrying === row.original.id"
+            @click="retry(row.original.id)"
+          >
             Retry
           </UButton>
         </template>
       </UTable>
-      <p v-if="!logs?.length" class="text-gray-500 text-center py-4">No posts yet</p>
     </UCard>
   </div>
 </template>
 
 <script setup lang="ts">
-const { data: logs, refresh } = useFetch('/api/post-log')
+const { data: logs, refresh, status } = useFetch('/api/post-log')
 const retrying = ref('')
 
 const columns = [

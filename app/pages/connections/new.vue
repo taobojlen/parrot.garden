@@ -1,25 +1,36 @@
 <template>
   <div class="mx-auto max-w-lg">
-    <h1 class="text-2xl font-bold mb-6">Create Connection</h1>
+    <div class="flex items-center gap-2 mb-6">
+      <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
+      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Create Connection</h1>
+    </div>
     <UCard>
-      <form @submit.prevent="handleSubmit">
+      <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
-          <UFormField label="Source">
-            <USelect v-model="form.sourceId" :items="sourceOptions" placeholder="Select a source" required />
+          <UFormField label="Source" name="sourceId" required>
+            <USelect v-model="form.sourceId" :items="sourceOptions" value-key="value" placeholder="Select a source" required />
           </UFormField>
-          <UFormField label="Target">
-            <USelect v-model="form.targetId" :items="targetOptions" placeholder="Select a target" required />
+          <UFormField label="Target" name="targetId" required>
+            <USelect v-model="form.targetId" :items="targetOptions" value-key="value" placeholder="Select a target" required />
           </UFormField>
-          <UFormField label="Template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
-            <UTextarea v-model="form.template" :rows="3" />
+          <USeparator />
+          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
+            <UTextarea v-model="form.template" :rows="3" placeholder="{{title}} {{link}}" />
           </UFormField>
         </div>
-        <div class="flex gap-2 mt-6">
+        <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="loading">Create Connection</UButton>
-          <NuxtLink to="/dashboard"><UButton variant="ghost">Cancel</UButton></NuxtLink>
+          <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
         </div>
-        <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
-      </form>
+      </UForm>
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        :title="error"
+        class="mt-4"
+      />
     </UCard>
   </div>
 </template>

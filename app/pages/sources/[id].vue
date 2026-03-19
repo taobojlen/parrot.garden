@@ -1,31 +1,42 @@
 <template>
   <div class="mx-auto max-w-lg">
-    <h1 class="text-2xl font-bold mb-6">Edit Source</h1>
+    <div class="flex items-center gap-2 mb-6">
+      <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
+      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Edit Source</h1>
+    </div>
     <UCard>
-      <form @submit.prevent="handleSubmit">
+      <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
-          <UFormField label="Name">
-            <UInput v-model="form.name" placeholder="My Blog" required />
+          <UFormField label="Name" name="name" required>
+            <UInput v-model="form.name" placeholder="My Blog" icon="i-lucide-type" required />
           </UFormField>
-          <UFormField label="Feed URL">
-            <UInput v-model="form.url" type="url" placeholder="https://example.com/feed.xml" required />
+          <UFormField label="Feed URL" name="url" required>
+            <UInput v-model="form.url" type="url" placeholder="https://example.com/feed.xml" icon="i-lucide-rss" required />
           </UFormField>
         </div>
-        <div class="flex gap-2 mt-6">
+        <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="saving">Save Changes</UButton>
-          <NuxtLink to="/dashboard"><UButton variant="ghost">Cancel</UButton></NuxtLink>
+          <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
+          <div class="flex-1" />
           <UButton
-            class="ml-auto"
             color="error"
-            variant="ghost"
+            variant="soft"
             :loading="deleting"
+            icon="i-lucide-trash-2"
             @click="handleDelete"
           >
             Delete
           </UButton>
         </div>
-        <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
-      </form>
+      </UForm>
+      <UAlert
+        v-if="error"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        :title="error"
+        class="mt-4"
+      />
     </UCard>
   </div>
 </template>
