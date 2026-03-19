@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core'],
   hub: {
-    database: true,
+    db: 'sqlite',
   },
   nitro: {
     experimental: {
