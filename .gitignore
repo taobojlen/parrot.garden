@@ -28,3 +28,6 @@ logs
 
 # Superpowers brainstorming
 .superpowers
+
+# Sentry Config File
+.env.sentry-build-plugin

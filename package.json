@@ -17,10 +17,12 @@
     "@nuxthub/core": "0.10.7",
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
+    "@sentry/nuxt": "^10.44.0",
     "@tailwindcss/vite": "^4.2.1",
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
     "fast-xml-parser": "^5.5.6",
+    "import-in-the-middle": "^3.0.0",
     "nuxt": "^4.4.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -34,5 +36,10 @@
     "drizzle-kit": "^0.31.10",
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@vercel/nft": "^0.27.4"
+    }
   }
 }

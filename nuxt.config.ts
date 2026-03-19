@@ -4,8 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module'],
   css: ['~/assets/css/main.css'],
+
   vite: {
     plugins: [
       tailwindcss(),
@@ -17,6 +18,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   hub: {
     db: {
       dialect: 'sqlite',
@@ -24,6 +26,7 @@ export default defineNuxtConfig({
       connection: { databaseId: '7d8c14ce-b905-4974-aced-b700006eff96' },
     },
   },
+
   nitro: {
     experimental: {
       tasks: true,
@@ -35,6 +38,7 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'parrot',
         workers_dev: false,
+        compatibility_flags: ['nodejs_compat'],
         observability: {
           logs: {
             enabled: true,
@@ -47,10 +51,20 @@ export default defineNuxtConfig({
       },
     },
   },
+
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
     resendApiKey: '',
     resendFromEmail: '',
+  },
+
+  sentry: {
+    org: 'mori-technologies',
+    project: 'parrotgarden',
+  },
+
+  sourcemap: {
+    client: 'hidden',
   },
 })
