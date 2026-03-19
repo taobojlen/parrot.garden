@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@atinux/kysely-d1':
-        specifier: ^0.3.1
-        version: 0.3.1(kysely@0.28.12)
       '@atproto/api':
         specifier: ^0.19.3
         version: 0.19.3
@@ -69,11 +66,6 @@ packages:
     engines: {node: '>= 20'}
     peerDependencies:
       '@types/json-schema': ^7.0.15
-
-  '@atinux/kysely-d1@0.3.1':
-    resolution: {integrity: sha512-QyPnZLPSb2qksGsORhYtODi3qPASzUfON6tgaCGhpfb71h6TPSd0v5msjdptCcwRMnWi+bxqHkTufJiaiDjzfw==}
-    peerDependencies:
-      kysely: '*'
 
   '@atproto/api@0.19.3':
     resolution: {integrity: sha512-G8YpBpRouHdTAIagi/QQIUZOhGd1jfBQWkJy9QfxAzjjEpPvaVOSk4e1S85QzGLm/xbzVONzGkmdtiOSfP6wVg==}
@@ -6252,10 +6244,6 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       js-yaml: 4.1.1
-
-  '@atinux/kysely-d1@0.3.1(kysely@0.28.12)':
-    dependencies:
-      kysely: 0.28.12
 
   '@atproto/api@0.19.3':
     dependencies:
