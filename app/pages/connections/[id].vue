@@ -2,20 +2,20 @@
   <div class="mx-auto max-w-lg">
     <div class="flex items-center gap-2 mb-6">
       <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Edit Connection</h1>
+      <h1 class="text-2xl font-bold ">Edit Connection</h1>
     </div>
     <UCard>
       <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
           <UFormField label="Source" name="source">
-            <UInput :model-value="connection?.sourceName" disabled icon="i-lucide-rss" />
+            <UInput :model-value="connection?.sourceName" disabled icon="i-lucide-rss" class="w-full" />
           </UFormField>
           <UFormField label="Target" name="target">
-            <UInput :model-value="connection ? `${connection.targetName} (${connection.targetType})` : ''" disabled icon="i-lucide-share-2" />
+            <UInput :model-value="connection ? `${connection.targetName} (${connection.targetType})` : ''" disabled icon="i-lucide-share-2" class="w-full" />
           </UFormField>
           <USeparator />
-          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
-            <UTextarea v-model="form.template" :rows="3" />
+          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{content}}, {{author}}, {{date}}">
+            <UTextarea v-model="form.template" :rows="3" class="w-full" />
           </UFormField>
           <UFormField label="Status" name="enabled">
             <USwitch v-model="form.enabled" label="Active" :description="form.enabled ? 'Connection is active and will cross-post new items' : 'Connection is paused'" />
@@ -45,6 +45,46 @@
         class="mt-4"
       />
     </UCard>
+
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" />
+
+    <!-- Test Post -->
+    <UCard class="mt-6">
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UIcon name="i-lucide-send" class="text-primary" />
+          <h2 class="font-semibold">Test Post</h2>
+        </div>
+      </template>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+        Post the most recent feed item to test your connection and template.
+      </p>
+      <UButton
+        icon="i-lucide-send"
+        :loading="testing"
+        variant="soft"
+        @click="handleTest"
+      >
+        Send test post
+      </UButton>
+      <UAlert
+        v-if="testResult"
+        color="success"
+        variant="subtle"
+        icon="i-lucide-check"
+        title="Posted successfully"
+        :description="testResult"
+        class="mt-4"
+      />
+      <UAlert
+        v-if="testError"
+        color="error"
+        variant="subtle"
+        icon="i-lucide-circle-alert"
+        :title="testError"
+        class="mt-4"
+      />
+    </UCard>
   </div>
 </template>
 
@@ -61,7 +101,10 @@ const form = reactive({
 
 const saving = ref(false)
 const deleting = ref(false)
+const testing = ref(false)
 const error = ref('')
+const testResult = ref('')
+const testError = ref('')
 
 async function handleSubmit() {
   saving.value = true
@@ -73,6 +116,20 @@ async function handleSubmit() {
     error.value = e.data?.statusMessage || 'Failed to save connection'
   } finally {
     saving.value = false
+  }
+}
+
+async function handleTest() {
+  testing.value = true
+  testResult.value = ''
+  testError.value = ''
+  try {
+    const res = await $fetch<{ text: string }>(`/api/connections/${id}/test`, { method: 'POST' })
+    testResult.value = res.text
+  } catch (e: any) {
+    testError.value = e.data?.statusMessage || 'Test post failed'
+  } finally {
+    testing.value = false
   }
 }
 

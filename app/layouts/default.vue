@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-(--ui-bg)">
-    <header class="border-b border-(--ui-border)">
+  <div class="min-h-screen">
+    <header class="border-b border-neutral-200 dark:border-neutral-800">
       <UContainer>
         <div class="flex items-center justify-between h-14">
           <div class="flex items-center gap-6">
-            <NuxtLink to="/" class="text-lg font-bold text-(--ui-text-highlighted)">
+            <NuxtLink to="/" class="text-lg font-bold">
               Parrot
             </NuxtLink>
             <UNavigationMenu

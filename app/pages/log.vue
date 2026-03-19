@@ -1,16 +1,16 @@
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Post Log</h1>
+      <h1 class="text-2xl font-bold">Post Log</h1>
       <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="refresh">
         Refresh
       </UButton>
     </div>
     <UCard>
       <UTable
-        :data="logs || []"
+        v-if="logs?.length"
+        :data="logs"
         :columns="columns"
-        :empty="{ icon: 'i-lucide-scroll-text', label: 'No posts yet' }"
         :loading="status === 'pending'"
       >
         <template #status-cell="{ row }">
@@ -23,10 +23,10 @@
           </UBadge>
         </template>
         <template #error-cell="{ row }">
-          <span v-if="row.original.error" class="text-sm text-(--ui-text-muted) truncate max-w-48 block">
+          <span v-if="row.original.error" class="text-sm text-neutral-500 truncate max-w-48 block">
             {{ row.original.error }}
           </span>
-          <span v-else class="text-sm text-(--ui-text-dimmed)">&mdash;</span>
+          <span v-else class="text-sm text-neutral-400">&mdash;</span>
         </template>
         <template #actions-cell="{ row }">
           <UButton
@@ -42,6 +42,7 @@
           </UButton>
         </template>
       </UTable>
+      <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No posts yet</p>
     </UCard>
   </div>
 </template>

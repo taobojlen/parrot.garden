@@ -1,8 +1,6 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Dashboard</h1>
-    </div>
+    <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Sources -->
@@ -10,7 +8,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-rss" class="text-(--ui-primary)" />
+              <UIcon name="i-lucide-rss" class="text-primary" />
               <h2 class="font-semibold">Sources</h2>
             </div>
             <UButton to="/sources/new" size="xs" icon="i-lucide-plus" variant="soft">
@@ -19,24 +17,17 @@
           </div>
         </template>
         <div v-if="sources?.length" class="space-y-1">
-          <UButton
+          <NuxtLink
             v-for="source in sources"
             :key="source.id"
             :to="`/sources/${source.id}`"
-            variant="ghost"
-            color="neutral"
-            block
-            class="justify-start"
+            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
-            <div class="flex flex-col items-start gap-0.5 min-w-0">
-              <span class="font-medium text-sm">{{ source.name }}</span>
-              <span class="text-xs text-(--ui-text-muted) truncate max-w-full">{{ source.url }}</span>
-            </div>
-          </UButton>
+            <p class="font-medium text-sm">{{ source.name }}</p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate">{{ source.url }}</p>
+          </NuxtLink>
         </div>
-        <div v-else class="text-center py-4">
-          <p class="text-sm text-(--ui-text-dimmed)">No sources yet</p>
-        </div>
+        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No sources yet</p>
       </UCard>
 
       <!-- Targets -->
@@ -44,7 +35,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-share-2" class="text-(--ui-primary)" />
+              <UIcon name="i-lucide-share-2" class="text-primary" />
               <h2 class="font-semibold">Targets</h2>
             </div>
             <UButton to="/targets/new" size="xs" icon="i-lucide-plus" variant="soft">
@@ -53,24 +44,19 @@
           </div>
         </template>
         <div v-if="targets?.length" class="space-y-1">
-          <UButton
+          <NuxtLink
             v-for="target in targets"
             :key="target.id"
             :to="`/targets/${target.id}`"
-            variant="ghost"
-            color="neutral"
-            block
-            class="justify-start"
+            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
-            <div class="flex items-center gap-2 min-w-0">
+            <div class="flex items-center gap-2">
               <span class="font-medium text-sm">{{ target.name }}</span>
               <UBadge variant="subtle" size="xs" color="neutral">{{ target.type }}</UBadge>
             </div>
-          </UButton>
+          </NuxtLink>
         </div>
-        <div v-else class="text-center py-4">
-          <p class="text-sm text-(--ui-text-dimmed)">No targets yet</p>
-        </div>
+        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No targets yet</p>
       </UCard>
 
       <!-- Connections -->
@@ -78,7 +64,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-link" class="text-(--ui-primary)" />
+              <UIcon name="i-lucide-link" class="text-primary" />
               <h2 class="font-semibold">Connections</h2>
             </div>
             <UButton to="/connections/new" size="xs" icon="i-lucide-plus" variant="soft">
@@ -87,30 +73,21 @@
           </div>
         </template>
         <div v-if="connections?.length" class="space-y-1">
-          <UButton
+          <NuxtLink
             v-for="conn in connections"
             :key="conn.id"
             :to="`/connections/${conn.id}`"
-            variant="ghost"
-            color="neutral"
-            block
-            class="justify-start"
+            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
-            <div class="flex items-center gap-2 min-w-0">
+            <div class="flex items-center gap-2">
               <span class="font-medium text-sm">{{ conn.sourceName }} &rarr; {{ conn.targetName }}</span>
-              <UBadge
-                :color="conn.enabled ? 'success' : 'neutral'"
-                variant="subtle"
-                size="xs"
-              >
+              <UBadge :color="conn.enabled ? 'success' : 'neutral'" variant="subtle" size="xs">
                 {{ conn.enabled ? 'Active' : 'Paused' }}
               </UBadge>
             </div>
-          </UButton>
+          </NuxtLink>
         </div>
-        <div v-else class="text-center py-4">
-          <p class="text-sm text-(--ui-text-dimmed)">No connections yet</p>
-        </div>
+        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No connections yet</p>
       </UCard>
     </div>
   </div>

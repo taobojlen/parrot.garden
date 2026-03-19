@@ -45,6 +45,7 @@ export default eventHandler(async (event) => {
       itemTitle: item.title,
       itemLink: item.link,
       itemDescription: item.description,
+      itemContent: item.content,
       itemAuthor: item.author,
       itemPubDate: item.pubDate,
       status: 'skipped' as const,

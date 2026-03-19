@@ -2,16 +2,16 @@
   <div class="mx-auto max-w-lg">
     <div class="flex items-center gap-2 mb-6">
       <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Add RSS Source</h1>
+      <h1 class="text-2xl font-bold ">Add RSS Source</h1>
     </div>
     <UCard>
       <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
           <UFormField label="Name" name="name" required>
-            <UInput v-model="form.name" placeholder="My Blog" icon="i-lucide-type" required />
+            <UInput v-model="form.name" placeholder="My Blog" icon="i-lucide-type" required class="w-full" />
           </UFormField>
           <UFormField label="Feed URL" name="url" required>
-            <UInput v-model="form.url" type="url" placeholder="https://example.com/feed.xml" icon="i-lucide-rss" required />
+            <UInput v-model="form.url" type="url" placeholder="https://example.com/feed.xml" icon="i-lucide-rss" required class="w-full" />
           </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">

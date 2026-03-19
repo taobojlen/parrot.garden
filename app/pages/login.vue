@@ -3,8 +3,8 @@
     <UCard>
       <template #header>
         <div class="flex flex-col gap-1">
-          <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Sign in to Parrot</h1>
-          <p class="text-sm text-(--ui-text-muted)">We'll send you a magic link</p>
+          <h1 class="text-2xl font-bold">Sign in to Parrot</h1>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">We'll send you a magic link</p>
         </div>
       </template>
 
@@ -17,6 +17,7 @@
               placeholder="you@example.com"
               icon="i-lucide-mail"
               required
+              class="w-full"
             />
           </UFormField>
           <UButton type="submit" block :loading="loading">
@@ -26,9 +27,9 @@
       </UForm>
 
       <div v-else class="text-center py-6">
-        <UIcon name="i-lucide-mail-check" class="text-4xl text-(--ui-primary) mb-3" />
-        <p class="text-lg font-medium text-(--ui-text-highlighted)">Check your email!</p>
-        <p class="text-sm text-(--ui-text-muted) mt-2">
+        <UIcon name="i-lucide-mail-check" class="text-4xl text-primary mb-3" />
+        <p class="text-lg font-medium">Check your email!</p>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-2">
           We sent a magic link to <strong>{{ email }}</strong>
         </p>
       </div>

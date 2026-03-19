@@ -5,6 +5,7 @@ export interface FeedItem {
   title: string
   link: string
   description: string
+  content: string
   author: string
   pubDate: string // ISO 8601
 }
@@ -17,8 +18,11 @@ const parser = new XMLParser({
 
 function decodeEntities(text: string): string {
   return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&') // Must be last to avoid double-decoding
 }
 
@@ -43,6 +47,7 @@ function parseRssItems(channel: any): FeedItem[] {
     title: item.title ?? '',
     link: item.link ?? '',
     description: item.description ? stripHtml(String(item.description)) : '',
+    content: item['content:encoded'] ? stripHtml(String(item['content:encoded'])) : '',
     author: item.author ?? item['dc:creator'] ?? '',
     pubDate: toISODate(item.pubDate),
   }))
@@ -59,6 +64,7 @@ function parseAtomEntries(feed: any): FeedItem[] {
       title: entry.title?.['#text'] ?? entry.title ?? '',
       link,
       description: entry.summary ? stripHtml(String(entry.summary?.['#text'] ?? entry.summary)) : '',
+      content: entry.content ? stripHtml(String(entry.content?.['#text'] ?? entry.content)) : '',
       author: entry.author?.name ?? '',
       pubDate: toISODate(entry.updated ?? entry.published),
     }

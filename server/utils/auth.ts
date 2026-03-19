@@ -7,7 +7,7 @@ let _auth: ReturnType<typeof betterAuth>
 export function serverAuth() {
   if (!_auth) {
     _auth = betterAuth({
-      database: drizzleAdapter(db, { provider: 'sqlite' }),
+      database: drizzleAdapter(db, { provider: 'sqlite', schema }),
       baseURL: getBaseURL(),
       secret: useRuntimeConfig().betterAuthSecret,
       plugins: [

@@ -1,15 +1,10 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const session = useSession()
-  const protectedPaths = ['/dashboard', '/sources', '/targets', '/connections', '/log']
+export default defineNuxtRouteMiddleware(async (to) => {
+  // Public pages — never redirect
+  if (to.path === '/' || to.path === '/login') return
 
-  // Don't redirect while session is still loading to avoid flash redirects
-  if (session.value?.isPending) return
+  const { data: session } = await useSession(useFetch)
 
-  if (protectedPaths.some(p => to.path.startsWith(p)) && !session.value?.data?.user) {
+  if (!session.value) {
     return navigateTo('/login')
-  }
-
-  if (to.path === '/login' && session.value?.data?.user) {
-    return navigateTo('/dashboard')
   }
 })

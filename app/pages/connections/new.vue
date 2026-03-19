@@ -2,20 +2,20 @@
   <div class="mx-auto max-w-lg">
     <div class="flex items-center gap-2 mb-6">
       <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Create Connection</h1>
+      <h1 class="text-2xl font-bold">Create Connection</h1>
     </div>
     <UCard>
       <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
           <UFormField label="Source" name="sourceId" required>
-            <USelect v-model="form.sourceId" :items="sourceOptions" value-key="value" placeholder="Select a source" required />
+            <USelect v-model="form.sourceId" :items="sourceOptions" value-key="value" placeholder="Select a source" required class="w-full" />
           </UFormField>
           <UFormField label="Target" name="targetId" required>
-            <USelect v-model="form.targetId" :items="targetOptions" value-key="value" placeholder="Select a target" required />
+            <USelect v-model="form.targetId" :items="targetOptions" value-key="value" placeholder="Select a target" required class="w-full" />
           </UFormField>
           <USeparator />
-          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{author}}, {{date}}">
-            <UTextarea v-model="form.template" :rows="3" placeholder="{{title}} {{link}}" />
+          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{content}}, {{author}}, {{date}}">
+            <UTextarea v-model="form.template" :rows="3" placeholder="{{title}} {{link}}" class="w-full" />
           </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
@@ -32,6 +32,8 @@
         class="mt-4"
       />
     </UCard>
+
+    <TemplatePreview :source-id="form.sourceId" :template="form.template" />
   </div>
 </template>
 

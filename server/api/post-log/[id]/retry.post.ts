@@ -27,6 +27,7 @@ export default eventHandler(async (event) => {
       title: postLog.itemTitle ?? '',
       link: postLog.itemLink ?? '',
       description: postLog.itemDescription ?? '',
+      content: postLog.itemContent ?? '',
       author: postLog.itemAuthor ?? '',
       date: postLog.itemPubDate ?? '',
     }),

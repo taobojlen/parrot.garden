@@ -2,24 +2,24 @@
   <div class="mx-auto max-w-lg">
     <div class="flex items-center gap-2 mb-6">
       <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
-      <h1 class="text-2xl font-bold text-(--ui-text-highlighted)">Edit Target</h1>
+      <h1 class="text-2xl font-bold ">Edit Target</h1>
     </div>
     <UCard>
       <UForm :state="formState" @submit="handleSubmit">
         <div class="space-y-4">
           <UFormField label="Name" name="name" required>
-            <UInput v-model="form.name" placeholder="My Bluesky" icon="i-lucide-type" required />
+            <UInput v-model="form.name" placeholder="My Bluesky" icon="i-lucide-type" required class="w-full" />
           </UFormField>
           <UFormField label="Type" name="type" required>
-            <USelect v-model="form.type" :items="targetTypes" value-key="value" required />
+            <USelect v-model="form.type" :items="targetTypes" value-key="value" required class="w-full" />
           </UFormField>
           <template v-if="form.type === 'bluesky'">
             <USeparator label="Update Credentials" />
             <UFormField label="Handle" name="handle" hint="Leave blank to keep existing credentials">
-              <UInput v-model="credentials.handle" placeholder="Enter new handle to update" icon="i-lucide-at-sign" />
+              <UInput v-model="credentials.handle" placeholder="Enter new handle to update" icon="i-lucide-at-sign" class="w-full" />
             </UFormField>
             <UFormField label="App Password" name="appPassword" hint="Leave blank to keep existing credentials">
-              <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" icon="i-lucide-key-round" />
+              <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" icon="i-lucide-key-round" class="w-full" />
             </UFormField>
           </template>
         </div>

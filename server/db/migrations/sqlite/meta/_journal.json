@@ -8,6 +8,13 @@
       "when": 1773913499303,
       "tag": "0000_sleepy_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1773919304157,
+      "tag": "0001_yielding_skullbuster",
+      "breakpoints": true
     }
   ]
 }
