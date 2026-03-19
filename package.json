@@ -22,7 +22,6 @@
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
     "fast-xml-parser": "^5.5.6",
-
     "nuxt": "^4.4.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -33,7 +32,11 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.98",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "@vue/test-utils": "^2.4.6",
     "drizzle-kit": "^0.31.10",
+    "happy-dom": "^20.8.4",
+    "unplugin-auto-import": "^21.0.0",
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"
   },
