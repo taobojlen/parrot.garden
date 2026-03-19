@@ -3,7 +3,7 @@
     title="Parrot"
     description="Cross-post your RSS feeds to Bluesky, Mastodon, and more."
     :links="[
-      { label: 'Get Started', to: '/login', icon: 'i-lucide-arrow-right', trailing: true, size: 'lg' },
+      { label: 'Get Started', to: '/dashboard', icon: 'i-lucide-arrow-right', trailing: true, size: 'lg' },
       { label: 'Learn More', to: '#features', variant: 'soft', color: 'neutral', size: 'lg' }
     ]"
   />

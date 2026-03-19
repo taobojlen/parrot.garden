@@ -1,8 +1,12 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  // Public pages — never redirect
-  if (to.path === '/' || to.path === '/login') return
+  if (to.path === '/') return
 
   const { data: session } = await useSession(useFetch)
+
+  if (to.path === '/login') {
+    if (session.value) return navigateTo('/dashboard')
+    return
+  }
 
   if (!session.value) {
     return navigateTo('/login')
