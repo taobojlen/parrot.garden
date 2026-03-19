@@ -46,7 +46,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" />
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :connection-id="id" />
 
     <!-- Test Post -->
     <UCard class="mt-6">
