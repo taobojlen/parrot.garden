@@ -33,6 +33,8 @@ export default defineNuxtConfig({
     },
     cloudflare: {
       wrangler: {
+        name: 'parrot',
+        workers_dev: false,
         triggers: {
           crons: ['*/5 * * * *'],
         },
