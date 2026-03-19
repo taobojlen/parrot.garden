@@ -1,5 +1,10 @@
 import { XMLParser } from 'fast-xml-parser'
 
+export interface FeedImage {
+  url: string
+  alt: string
+}
+
 export interface FeedItem {
   guid: string
   title: string
@@ -8,6 +13,7 @@ export interface FeedItem {
   content: string
   author: string
   pubDate: string // ISO 8601
+  images: FeedImage[]
 }
 
 const parser = new XMLParser({
@@ -38,6 +44,72 @@ function stripHtml(html: string): string {
     .trim()
 }
 
+const MAX_IMAGES = 4
+
+function extractImagesFromHtml(html: string): FeedImage[] {
+  if (!html) return []
+  const decoded = decodeEntities(String(html))
+  const images: FeedImage[] = []
+  const imgRegex = /<img\s[^>]*?src=["']([^"']+)["'][^>]*?>/gi
+  let match
+  while ((match = imgRegex.exec(decoded)) !== null) {
+    const url = match[1]
+    const altMatch = match[0].match(/alt=["']([^"']*)["']/)
+    images.push({ url, alt: altMatch ? altMatch[1] : '' })
+  }
+  return images
+}
+
+function extractImagesFromEnclosures(item: any): FeedImage[] {
+  const enclosures = Array.isArray(item.enclosure) ? item.enclosure : item.enclosure ? [item.enclosure] : []
+  return enclosures
+    .filter((e: any) => {
+      const type = e['@_type'] ?? ''
+      return type.startsWith('image/')
+    })
+    .map((e: any) => ({ url: e['@_url'] ?? '', alt: '' }))
+}
+
+function extractImagesFromMedia(item: any): FeedImage[] {
+  const mediaContent = Array.isArray(item['media:content']) ? item['media:content'] : item['media:content'] ? [item['media:content']] : []
+  return mediaContent
+    .filter((m: any) => {
+      const medium = m['@_medium'] ?? ''
+      const type = m['@_type'] ?? ''
+      return medium === 'image' || type.startsWith('image/')
+    })
+    .map((m: any) => ({
+      url: m['@_url'] ?? '',
+      alt: m['media:description']
+        ? String(m['media:description']?.['#text'] ?? m['media:description'] ?? '')
+        : '',
+    }))
+}
+
+function collectImages(item: any, ...htmlFields: string[]): FeedImage[] {
+  const seen = new Set<string>()
+  const images: FeedImage[] = []
+
+  function add(list: FeedImage[]) {
+    for (const img of list) {
+      if (!img.url || seen.has(img.url)) continue
+      seen.add(img.url)
+      images.push(img)
+    }
+  }
+
+  add(extractImagesFromEnclosures(item))
+  add(extractImagesFromMedia(item))
+  for (const field of htmlFields) {
+    const val = item[field]
+    if (!val) continue
+    const raw = typeof val === 'object' ? String(val['#text'] ?? val) : String(val)
+    add(extractImagesFromHtml(raw))
+  }
+
+  return images.slice(0, MAX_IMAGES)
+}
+
 function toISODate(dateStr: string | undefined): string {
   if (!dateStr) return ''
   try {
@@ -58,6 +130,7 @@ function parseRssItems(channel: any): FeedItem[] {
     content: item['content:encoded'] ? stripHtml(String(item['content:encoded'])) : '',
     author: decodeEntities(String(item.author ?? item['dc:creator'] ?? '')),
     pubDate: toISODate(item.pubDate),
+    images: collectImages(item, 'description', 'content:encoded'),
   }))
 }
 
@@ -67,14 +140,17 @@ function parseAtomEntries(feed: any): FeedItem[] {
     const link = Array.isArray(entry.link)
       ? entry.link.find((l: any) => l['@_rel'] === 'alternate' || !l['@_rel'])?.['@_href']
       : entry.link?.['@_href'] ?? entry.link ?? ''
+    const contentRaw = entry.content?.['#text'] ?? entry.content ?? ''
+    const summaryRaw = entry.summary?.['#text'] ?? entry.summary ?? ''
     return {
       guid: entry.id ?? link ?? '',
       title: decodeEntities(String(entry.title?.['#text'] ?? entry.title ?? '')),
       link,
-      description: entry.summary ? stripHtml(String(entry.summary?.['#text'] ?? entry.summary)) : '',
-      content: entry.content ? stripHtml(String(entry.content?.['#text'] ?? entry.content)) : '',
+      description: entry.summary ? stripHtml(String(summaryRaw)) : '',
+      content: entry.content ? stripHtml(String(contentRaw)) : '',
       author: decodeEntities(String(entry.author?.name ?? '')),
       pubDate: toISODate(entry.updated ?? entry.published),
+      images: collectImages(entry, 'content', 'summary'),
     }
   })
 }
