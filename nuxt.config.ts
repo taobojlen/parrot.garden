@@ -35,6 +35,12 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'parrot',
         workers_dev: false,
+        observability: {
+          logs: {
+            enabled: true,
+            invocation_logs: true,
+          },
+        },
         triggers: {
           crons: ['*/5 * * * *'],
         },
