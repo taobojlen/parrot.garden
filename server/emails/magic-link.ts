@@ -9,36 +9,9 @@ import {
   Section,
   Text,
 } from '@react-email/components'
-import * as React from 'react'
+import React from 'react'
 
-interface MagicLinkEmailProps {
-  url: string
-}
-
-export default function MagicLinkEmail({ url }: MagicLinkEmailProps) {
-  return (
-    <Html>
-      <Head />
-      <Preview>Sign in to Parrot</Preview>
-      <Body style={body}>
-        <Container style={container}>
-          <Heading style={heading}>Sign in to Parrot</Heading>
-          <Section style={section}>
-            <Text style={text}>
-              Click the button below to sign in. This link expires in 5 minutes.
-            </Text>
-            <Link href={url} style={button}>
-              Sign in
-            </Link>
-          </Section>
-          <Text style={footer}>
-            If you didn't request this email, you can safely ignore it.
-          </Text>
-        </Container>
-      </Body>
-    </Html>
-  )
-}
+const e = React.createElement
 
 const body: React.CSSProperties = {
   backgroundColor: '#f4f4f5',
@@ -88,4 +61,25 @@ const footer: React.CSSProperties = {
   lineHeight: '20px',
   color: '#a1a1aa',
   margin: '0',
+}
+
+export default function MagicLinkEmail({ url }: { url: string }) {
+  return e(Html, null,
+    e(Head),
+    e(Preview, null, 'Sign in to Parrot'),
+    e(Body, { style: body },
+      e(Container, { style: container },
+        e(Heading, { style: heading }, 'Sign in to Parrot'),
+        e(Section, { style: section },
+          e(Text, { style: text },
+            'Click the button below to sign in. This link expires in 5 minutes.',
+          ),
+          e(Link, { href: url, style: button }, 'Sign in'),
+        ),
+        e(Text, { style: footer },
+          "If you didn't request this email, you can safely ignore it.",
+        ),
+      ),
+    ),
+  )
 }
