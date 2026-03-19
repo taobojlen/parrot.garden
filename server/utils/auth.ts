@@ -1,7 +1,9 @@
+import { render } from '@react-email/render'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { magicLink } from 'better-auth/plugins'
 import { Resend } from 'resend'
+import MagicLinkEmail from '../emails/magic-link'
 
 let _auth: ReturnType<typeof betterAuth>
 
@@ -21,11 +23,12 @@ export function serverAuth() {
               return
             }
             const resend = new Resend(config.resendApiKey)
+            const html = await render(MagicLinkEmail({ url }))
             await resend.emails.send({
               from: config.resendFromEmail || 'Parrot <noreply@parrot.app>',
               to: email,
               subject: 'Sign in to Parrot',
-              html: `<p>Click the link below to sign in to Parrot:</p><p><a href="${url}">Sign in</a></p><p>This link expires in 5 minutes.</p>`,
+              html,
             })
           },
         }),
