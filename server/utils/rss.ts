@@ -32,7 +32,10 @@ function decodeEntities(text: string): string {
 }
 
 function stripHtml(html: string): string {
-  return decodeEntities(html).replace(/<[^>]*>/g, '').trim()
+  return decodeEntities(html)
+    .replace(/<[^>]*>/g, '')
+    .replace(/\[([^\]]*)\]\(([^)]+)\)/g, '$1 ($2)')
+    .trim()
 }
 
 function toISODate(dateStr: string | undefined): string {
