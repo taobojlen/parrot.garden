@@ -35,10 +35,10 @@ export default eventHandler(async (event) => {
 
   await db.insert(schema.connections).values(connection)
 
-  // Initial sync: mark ALL existing feed items as 'skipped'
-  try {
-    const items = await fetchAndParseFeed(source.url)
-    const skippedLogs = items.map(item => ({
+  // Mark all existing feed items as 'skipped' so only new items get posted
+  const items = await fetchAndParseFeed(source.url)
+  if (items.length > 0) {
+    await db.insert(schema.postLogs).values(items.map(item => ({
       id: crypto.randomUUID(),
       connectionId: connection.id,
       itemGuid: item.guid,
@@ -53,14 +53,7 @@ export default eventHandler(async (event) => {
       error: null,
       postedAt: now,
       updatedAt: now,
-    }))
-    if (skippedLogs.length > 0) {
-      await db.insert(schema.postLogs).values(skippedLogs)
-    }
-  }
-  catch (e) {
-    // Initial sync failure is non-fatal
-    console.warn(`Initial sync failed for connection ${connection.id}:`, e)
+    }))).onConflictDoNothing()
   }
 
   return connection
