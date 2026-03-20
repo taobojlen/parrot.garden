@@ -21,6 +21,7 @@ const parser = new XMLParser({
   attributeNamePrefix: '@_',
   processEntities: true,
   htmlEntities: true,
+  entityExpansionLimit: 5000,
 })
 
 function decodeHtmlEntities(text: string): string {
