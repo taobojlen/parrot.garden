@@ -57,15 +57,13 @@ const formState = computed(() => ({ email: email.value }))
 async function handleSubmit() {
   loading.value = true
   error.value = ''
-  try {
-    await signIn.magicLink({ email: email.value, callbackURL: '/dashboard' })
+  const result = await signIn.magicLink({ email: email.value, callbackURL: '/dashboard' })
+  loading.value = false
+  if (result.error) {
+    error.value = result.error.message || 'Failed to send magic link'
+  }
+  else {
     sent.value = true
-  }
-  catch (e: any) {
-    error.value = e.message || 'Failed to send magic link'
-  }
-  finally {
-    loading.value = false
   }
 }
 </script>

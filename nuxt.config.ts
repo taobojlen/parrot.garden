@@ -43,6 +43,9 @@ export default defineNuxtConfig({
         name: 'parrot',
         workers_dev: false,
         compatibility_flags: ['nodejs_compat'],
+        d1_databases: [
+          { binding: 'DB', database_id: '7d8c14ce-b905-4974-aced-b700006eff96' },
+        ],
         observability: {
           logs: {
             enabled: true,
