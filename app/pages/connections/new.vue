@@ -17,6 +17,9 @@
           <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{content}}, {{author}}, {{date}}">
             <UTextarea v-model="form.template" :rows="3" placeholder="{{title}} {{link}}" class="w-full" />
           </UFormField>
+          <UFormField label="Images" name="includeImages">
+            <UCheckbox v-model="form.includeImages" label="Include images" description="Attach images from feed items to posts" />
+          </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="loading">Create Connection</UButton>
@@ -33,7 +36,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="form.sourceId" :template="form.template" />
+    <TemplatePreview :source-id="form.sourceId" :template="form.template" :include-images="form.includeImages" />
   </div>
 </template>
 
@@ -48,7 +51,7 @@ const selectedTarget = computed(() => (targets.value || []).find(t => t.id === f
 
 const DEFAULT_TEMPLATES: Record<string, string> = { bluesky: '{{title}} {{link}}' }
 
-const form = reactive({ sourceId: '', targetId: '', template: '{{title}} {{link}}' })
+const form = reactive({ sourceId: '', targetId: '', template: '{{title}} {{link}}', includeImages: false })
 
 watch(() => form.targetId, () => {
   if (selectedTarget.value) {
