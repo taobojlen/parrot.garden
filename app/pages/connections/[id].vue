@@ -25,7 +25,7 @@
           </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
-          <UButton type="submit" :loading="saving">Save Changes</UButton>
+          <UButton type="submit" :loading="saving" :icon="saved ? 'i-lucide-check' : undefined">{{ saved ? 'Saved' : 'Save Changes' }}</UButton>
           <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
           <div class="flex-1" />
           <UButton
@@ -49,7 +49,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" />
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" />
 
     <!-- Test Post -->
     <UCard class="mt-6">
@@ -62,7 +62,17 @@
       <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
         Post the most recent feed item to test your connection and template.
       </p>
+      <UTooltip v-if="hasUnsavedChanges" text="Save your changes first">
+        <UButton
+          icon="i-lucide-send"
+          variant="soft"
+          disabled
+        >
+          Send test post
+        </UButton>
+      </UTooltip>
       <UButton
+        v-else
         icon="i-lucide-send"
         :loading="testing"
         variant="soft"
@@ -104,18 +114,29 @@ const form = reactive({
 })
 
 const saving = ref(false)
+const saved = ref(false)
 const deleting = ref(false)
 const testing = ref(false)
 const error = ref('')
 const testResult = ref('')
 const testError = ref('')
 
+const savedForm = ref({ ...form })
+const hasUnsavedChanges = computed(() =>
+  form.template !== savedForm.value.template
+  || form.includeImages !== savedForm.value.includeImages
+  || form.enabled !== savedForm.value.enabled,
+)
+
+watch(() => ({ ...form }), () => { saved.value = false })
+
 async function handleSubmit() {
   saving.value = true
   error.value = ''
   try {
     await $fetch(`/api/connections/${id}`, { method: 'PUT', body: form })
-    navigateTo('/dashboard')
+    savedForm.value = { ...form }
+    saved.value = true
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to save connection'
   } finally {

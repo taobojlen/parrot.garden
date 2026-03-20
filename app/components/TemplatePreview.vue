@@ -34,8 +34,18 @@
           <p v-else class="text-xs text-neutral-400">
             {{ item.graphemes }}/300 graphemes
           </p>
+          <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first">
+            <UButton
+              size="xs"
+              variant="soft"
+              icon="i-lucide-send"
+              disabled
+            >
+              Post
+            </UButton>
+          </UTooltip>
           <UButton
-            v-if="connectionId"
+            v-else-if="connectionId"
             size="xs"
             variant="soft"
             icon="i-lucide-send"
@@ -87,6 +97,7 @@ const props = defineProps<{
   template: string
   includeImages?: boolean
   connectionId?: string
+  hasUnsavedChanges?: boolean
 }>()
 
 const feedItems = ref<any[]>([])

@@ -40,8 +40,8 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/sources', { method: 'POST', body: form })
-    navigateTo('/dashboard')
+    const created = await $fetch('/api/sources', { method: 'POST', body: form })
+    navigateTo(`/sources/${created.id}`)
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to add source'
   } finally {

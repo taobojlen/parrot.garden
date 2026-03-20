@@ -24,7 +24,7 @@
           </template>
         </div>
         <div class="flex items-center gap-2 mt-6">
-          <UButton type="submit" :loading="saving">Save Changes</UButton>
+          <UButton type="submit" :loading="saving" :icon="saved ? 'i-lucide-check' : undefined">{{ saved ? 'Saved' : 'Save Changes' }}</UButton>
           <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
           <div class="flex-1" />
           <UButton
@@ -69,8 +69,11 @@ const credentials = reactive({ handle: '', appPassword: '' })
 const formState = computed(() => ({ ...form, ...credentials }))
 
 const saving = ref(false)
+const saved = ref(false)
 const deleting = ref(false)
 const error = ref('')
+
+watch(() => ({ ...form, ...credentials }), () => { saved.value = false })
 
 async function handleSubmit() {
   saving.value = true
@@ -82,7 +85,9 @@ async function handleSubmit() {
       body.credentials = { handle: credentials.handle, appPassword: credentials.appPassword }
     }
     await $fetch(`/api/targets/${id}`, { method: 'PUT', body })
-    navigateTo('/dashboard')
+    saved.value = true
+    credentials.handle = ''
+    credentials.appPassword = ''
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to save target'
   } finally {

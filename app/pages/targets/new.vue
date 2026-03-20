@@ -53,8 +53,8 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/targets', { method: 'POST', body: { ...form, credentials } })
-    navigateTo('/dashboard')
+    const created = await $fetch('/api/targets', { method: 'POST', body: { ...form, credentials } })
+    navigateTo(`/targets/${created.id}`)
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to add target'
   } finally {

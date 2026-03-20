@@ -15,7 +15,7 @@
           </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
-          <UButton type="submit" :loading="saving">Save Changes</UButton>
+          <UButton type="submit" :loading="saving" :icon="saved ? 'i-lucide-check' : undefined">{{ saved ? 'Saved' : 'Save Changes' }}</UButton>
           <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
           <div class="flex-1" />
           <UButton
@@ -121,15 +121,18 @@ const form = reactive({
 })
 
 const saving = ref(false)
+const saved = ref(false)
 const deleting = ref(false)
 const error = ref('')
+
+watch(() => ({ ...form }), () => { saved.value = false })
 
 async function handleSubmit() {
   saving.value = true
   error.value = ''
   try {
     await $fetch(`/api/sources/${id}`, { method: 'PUT', body: form })
-    navigateTo('/dashboard')
+    saved.value = true
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to save source'
   } finally {

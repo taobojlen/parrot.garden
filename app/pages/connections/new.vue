@@ -66,8 +66,8 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/connections', { method: 'POST', body: form })
-    navigateTo('/dashboard')
+    const created = await $fetch('/api/connections', { method: 'POST', body: form })
+    navigateTo(`/connections/${created.id}`)
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to create connection'
   } finally {
