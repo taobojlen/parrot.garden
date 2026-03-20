@@ -14,7 +14,7 @@
       <div
         v-for="(item, i) in previewItems"
         :key="i"
-        class="group relative p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
+        class="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
       >
         <p>{{ item.rendered }}</p>
         <div v-if="item.images.length" class="flex gap-2 mt-2">
@@ -27,14 +27,15 @@
             class="w-16 h-16 object-cover rounded border border-neutral-200 dark:border-neutral-700"
           />
         </div>
-        <p v-if="item.truncated" class="text-xs text-warning mt-1">
-          Truncated ({{ item.graphemes }}/300 graphemes)
-        </p>
-        <p v-else class="text-xs text-neutral-400 mt-1">
-          {{ item.graphemes }}/300 graphemes
-        </p>
-        <div v-if="connectionId" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex items-center justify-between mt-3">
+          <p v-if="item.truncated" class="text-xs text-warning">
+            Truncated ({{ item.graphemes }}/300 graphemes)
+          </p>
+          <p v-else class="text-xs text-neutral-400">
+            {{ item.graphemes }}/300 graphemes
+          </p>
           <UButton
+            v-if="connectionId"
             size="xs"
             variant="soft"
             icon="i-lucide-send"
@@ -64,6 +65,19 @@
       </div>
     </div>
     <p v-else class="py-4 text-center text-sm text-neutral-400">No items in feed</p>
+
+    <UModal v-model:open="confirmOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="font-semibold text-lg">Confirm post</h3>
+          <p class="text-sm text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">{{ confirmText }}</p>
+          <div class="flex justify-end gap-2">
+            <UButton variant="ghost" @click="confirmOpen = false">Cancel</UButton>
+            <UButton color="primary" icon="i-lucide-send" :loading="postingIndex !== null" @click="confirmAndPost">Post</UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </UCard>
 </template>
 
@@ -122,8 +136,23 @@ const postingIndex = ref<number | null>(null)
 const postedIndices = ref(new Set<number>())
 const postResults = ref<Record<number, { success?: boolean; error?: string }>>({})
 
-async function handlePost(index: number) {
+const confirmOpen = ref(false)
+const pendingPostIndex = ref<number | null>(null)
+const confirmText = computed(() => {
+  if (pendingPostIndex.value === null) return ''
+  return previewItems.value[pendingPostIndex.value]?.rendered ?? ''
+})
+
+function handlePost(index: number) {
   if (!props.connectionId) return
+  pendingPostIndex.value = index
+  confirmOpen.value = true
+}
+
+async function confirmAndPost() {
+  const index = pendingPostIndex.value
+  if (index === null || !props.connectionId) return
+  confirmOpen.value = false
   postingIndex.value = index
   postResults.value[index] = {}
   try {
@@ -137,6 +166,7 @@ async function handlePost(index: number) {
     postResults.value[index] = { error: e.data?.statusMessage || 'Failed to post' }
   } finally {
     postingIndex.value = null
+    pendingPostIndex.value = null
   }
 }
 

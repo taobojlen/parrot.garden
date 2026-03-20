@@ -27,6 +27,7 @@ export default eventHandler(async (event) => {
     if (!credentials[field]) {
       throw createError({ statusCode: 400, statusMessage: `Missing credential: ${field}` })
     }
+    credentials[field] = credentials[field].trim().replace(/[\u200B-\u200D\u2028-\u202F\uFEFF]/g, '')
   }
 
   const now = new Date()
