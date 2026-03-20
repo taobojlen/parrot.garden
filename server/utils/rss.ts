@@ -46,16 +46,33 @@ function stripHtml(html: string): string {
 
 const MAX_IMAGES = 4
 
+function decodeHtmlStructure(text: string): string {
+  // Decode entities needed to parse HTML tags (< > &), but preserve quote
+  // entities (&quot; &apos;) so regex can correctly identify attribute boundaries.
+  // Two passes handle double-encoded entities (e.g. &amp;lt; → &lt; → <).
+  let result = text
+  for (let i = 0; i < 2; i++) {
+    result = result
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&') // Must be last
+  }
+  return result
+}
+
 function extractImagesFromHtml(html: string): FeedImage[] {
   if (!html) return []
-  const decoded = decodeEntities(String(html))
+  // Decode structural entities to find HTML tags, but preserve quote entities
+  // (&quot; &apos;) so attribute value boundaries aren't broken by quotes in values.
+  const decoded = decodeHtmlStructure(String(html))
   const images: FeedImage[] = []
   const imgRegex = /<img\s[^>]*?src=["']([^"']+)["'][^>]*?>/gi
   let match
   while ((match = imgRegex.exec(decoded)) !== null) {
-    const url = match[1]
+    const url = decodeEntities(match[1])
     const altMatch = match[0].match(/alt=["']([^"']*)["']/)
-    images.push({ url, alt: altMatch ? altMatch[1] : '' })
+    images.push({ url, alt: altMatch ? decodeEntities(altMatch[1]) : '' })
   }
   return images
 }

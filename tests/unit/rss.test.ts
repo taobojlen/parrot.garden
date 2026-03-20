@@ -217,6 +217,34 @@ describe('parseFeed', () => {
     ])
   })
 
+  it('preserves alt text containing encoded quotes', () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <item>
+        <title>Quoted Alt</title>
+        <link>https://example.com/quoted</link>
+        <description>&lt;img src="https://example.com/screenshot.png" alt="GitHub screenshot: &amp;quot;Merging this PR will improve performance by 6.3x&amp;quot;" /&gt;</description>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items[0].images).toEqual([
+      { url: 'https://example.com/screenshot.png', alt: 'GitHub screenshot: "Merging this PR will improve performance by 6.3x"' },
+    ])
+  })
+
+  it('preserves alt text containing encoded quotes in CDATA', () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <item>
+        <title>CDATA Quoted Alt</title>
+        <link>https://example.com/cdata-quoted</link>
+        <description><![CDATA[<img src="https://example.com/screenshot.png" alt="Screenshot: &quot;Hello world&quot;" />]]></description>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items[0].images).toEqual([
+      { url: 'https://example.com/screenshot.png', alt: 'Screenshot: "Hello world"' },
+    ])
+  })
+
   it('extracts images from img tags in Atom content', () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
