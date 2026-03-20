@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm'
+import { chunk, D1_BATCH_SIZE } from '../../utils/batch'
 
 const DEFAULT_TEMPLATES: Record<string, string> = {
   bluesky: '{{title}} {{link}}',
@@ -38,10 +39,7 @@ export default eventHandler(async (event) => {
 
   // Mark all existing feed items as 'skipped' so only new items get posted
   const items = await fetchAndParseFeed(source.url)
-  // D1 limits queries to 100 bound params; 14 columns per row → max 7 rows per batch
-  const BATCH_SIZE = 7
-  for (let i = 0; i < items.length; i += BATCH_SIZE) {
-    const batch = items.slice(i, i + BATCH_SIZE)
+  for (const batch of chunk(items, D1_BATCH_SIZE)) {
     await db.insert(schema.postLogs).values(batch.map(item => ({
       id: crypto.randomUUID(),
       connectionId: connection.id,

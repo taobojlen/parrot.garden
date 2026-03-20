@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm'
+import { processConnectionItems } from '../../utils/poll'
+import { chunk, D1_BATCH_SIZE } from '../../utils/batch'
 
 const MAX_ITEMS_PER_FEED = 10
-const MAX_RETRY_ATTEMPTS = 5
 
 export default defineTask({
   meta: {
@@ -59,101 +60,35 @@ export default defineTask({
 
         const existingGuids = new Map(existingLogs.map(l => [l.itemGuid, l]))
 
-        for (const item of items) {
-          const existing = existingGuids.get(item.guid)
-
-          // Skip if already posted or skipped
-          if (existing && (existing.status === 'posted' || existing.status === 'skipped')) {
-            skipped++
-            continue
-          }
-
-          // Skip if failed and exceeded max attempts
-          if (existing && existing.status === 'failed' && existing.attempts >= MAX_RETRY_ATTEMPTS) {
-            skipped++
-            continue
-          }
-
-          // Render template
-          const text = truncatePost(
-            renderTemplate(conn.connection.template, {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              content: item.content,
-              author: item.author,
-              date: item.pubDate,
-            }),
-            300,
-          )
-
-          // Post to target
-          try {
-            const credentials = JSON.parse(target.credentials)
+        const result = await processConnectionItems({
+          items,
+          existingLogs: existingGuids,
+          connectionId,
+          template: conn.connection.template,
+          includeImages: conn.connection.includeImages,
+          target: { type: target.type, credentials: target.credentials },
+          postFn: async (credentials, text, images) => {
             if (target.type === 'bluesky') {
-              await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined)
+              await postToBluesky(credentials, text, images)
             }
+          },
+        })
 
-            if (existing) {
-              await db.update(schema.postLogs)
-                .set({ status: 'posted', error: null, updatedAt: new Date() })
-                .where(eq(schema.postLogs.id, existing.id))
-            }
-            else {
-              await db.insert(schema.postLogs).values({
-                id: crypto.randomUUID(),
-                connectionId,
-                itemGuid: item.guid,
-                itemTitle: item.title,
-                itemLink: item.link,
-                itemDescription: item.description,
-                itemContent: item.content,
-                itemAuthor: item.author,
-                itemPubDate: item.pubDate,
-                status: 'posted',
-                attempts: 1,
-                error: null,
-                postedAt: new Date(),
-                updatedAt: new Date(),
-              })
-            }
-            posted++
-          }
-          catch (e: any) {
-            const isPermanent = e.status === 401 || e.status === 400
-            const attempts = (existing?.attempts ?? 0) + 1
-
-            if (existing) {
-              await db.update(schema.postLogs)
-                .set({
-                  status: 'failed',
-                  error: e.message,
-                  attempts: isPermanent ? MAX_RETRY_ATTEMPTS : attempts,
-                  updatedAt: new Date(),
-                })
-                .where(eq(schema.postLogs.id, existing.id))
-            }
-            else {
-              await db.insert(schema.postLogs).values({
-                id: crypto.randomUUID(),
-                connectionId,
-                itemGuid: item.guid,
-                itemTitle: item.title,
-                itemLink: item.link,
-                itemDescription: item.description,
-                itemContent: item.content,
-                itemAuthor: item.author,
-                itemPubDate: item.pubDate,
-                status: 'failed',
-                attempts: isPermanent ? MAX_RETRY_ATTEMPTS : 1,
-                error: e.message,
-                postedAt: new Date(),
-                updatedAt: new Date(),
-              })
-            }
-            failed++
-          }
+        // Batch-insert new post_log rows
+        for (const batch of chunk(result.newRows, D1_BATCH_SIZE)) {
+          await db.insert(schema.postLogs).values(batch).onConflictDoNothing()
         }
+
+        // Apply updates to existing rows
+        for (const update of result.updates) {
+          await db.update(schema.postLogs)
+            .set(update.set)
+            .where(eq(schema.postLogs.id, update.id))
+        }
+
+        posted += result.posted
+        failed += result.failed
+        skipped += result.skipped
       }
     }
 
