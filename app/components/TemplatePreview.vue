@@ -14,7 +14,7 @@
       <div
         v-for="(item, i) in previewItems"
         :key="i"
-        class="group relative p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
+        class="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
       >
         <p>{{ item.rendered }}</p>
         <div v-if="item.images.length" class="flex gap-2 mt-2">
@@ -27,14 +27,15 @@
             class="w-16 h-16 object-cover rounded border border-neutral-200 dark:border-neutral-700"
           />
         </div>
-        <p v-if="item.truncated" class="text-xs text-warning mt-1">
-          Truncated ({{ item.graphemes }}/300 graphemes)
-        </p>
-        <p v-else class="text-xs text-neutral-400 mt-1">
-          {{ item.graphemes }}/300 graphemes
-        </p>
-        <div v-if="connectionId" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex items-center justify-between mt-3">
+          <p v-if="item.truncated" class="text-xs text-warning">
+            Truncated ({{ item.graphemes }}/300 graphemes)
+          </p>
+          <p v-else class="text-xs text-neutral-400">
+            {{ item.graphemes }}/300 graphemes
+          </p>
           <UButton
+            v-if="connectionId"
             size="xs"
             variant="soft"
             icon="i-lucide-send"

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-@theme {
-  --default-cursor: pointer;
+@layer base {
+  button, a, [role="button"] {
+    cursor: pointer;
+  }
 }
