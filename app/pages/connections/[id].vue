@@ -18,7 +18,7 @@
             <UTextarea v-model="form.template" :rows="3" class="w-full" />
           </UFormField>
           <UFormField label="Images" name="includeImages">
-            <UCheckbox v-model="form.includeImages" label="Include images" description="Attach images from feed items to posts" />
+            <UCheckbox v-model="form.includeImages" label="Include images" :description="imageDescription" />
           </UFormField>
           <UFormField label="Status" name="enabled">
             <USwitch v-model="form.enabled" label="Active" :description="form.enabled ? 'Connection is active and will cross-post new items' : 'Connection is paused'" />
@@ -49,55 +49,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" />
-
-    <!-- Test Post -->
-    <UCard class="mt-6">
-      <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-send" class="text-primary" />
-          <h2 class="font-semibold">Test Post</h2>
-        </div>
-      </template>
-      <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-        Post the most recent feed item to test your connection and template.
-      </p>
-      <UTooltip v-if="hasUnsavedChanges" text="Save your changes first">
-        <UButton
-          icon="i-lucide-send"
-          variant="soft"
-          disabled
-        >
-          Send test post
-        </UButton>
-      </UTooltip>
-      <UButton
-        v-else
-        icon="i-lucide-send"
-        :loading="testing"
-        variant="soft"
-        @click="handleTest"
-      >
-        Send test post
-      </UButton>
-      <UAlert
-        v-if="testResult"
-        color="success"
-        variant="subtle"
-        icon="i-lucide-check"
-        title="Posted successfully"
-        :description="testResult"
-        class="mt-4"
-      />
-      <UAlert
-        v-if="testError"
-        color="error"
-        variant="subtle"
-        icon="i-lucide-circle-alert"
-        :title="testError"
-        class="mt-4"
-      />
-    </UCard>
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" @image-stats="imageStats = $event" />
   </div>
 </template>
 
@@ -113,13 +65,17 @@ const form = reactive({
   enabled: connection.value?.enabled ?? true,
 })
 
+const imageStats = ref({ total: 0, withImages: 0 })
+const imageDescription = computed(() => {
+  if (imageStats.value.withImages > 0) {
+    return `Attach images from feed items to posts (${imageStats.value.withImages} of ${imageStats.value.total} recent items have images)`
+  }
+  return 'Attach images from feed items to posts'
+})
 const saving = ref(false)
 const saved = ref(false)
 const deleting = ref(false)
-const testing = ref(false)
 const error = ref('')
-const testResult = ref('')
-const testError = ref('')
 
 const savedForm = ref({ ...form })
 const hasUnsavedChanges = computed(() =>
@@ -141,20 +97,6 @@ async function handleSubmit() {
     error.value = e.data?.statusMessage || 'Failed to save connection'
   } finally {
     saving.value = false
-  }
-}
-
-async function handleTest() {
-  testing.value = true
-  testResult.value = ''
-  testError.value = ''
-  try {
-    const res = await $fetch<{ text: string }>(`/api/connections/${id}/test`, { method: 'POST' })
-    testResult.value = res.text
-  } catch (e: any) {
-    testError.value = e.data?.statusMessage || 'Test post failed'
-  } finally {
-    testing.value = false
   }
 }
 

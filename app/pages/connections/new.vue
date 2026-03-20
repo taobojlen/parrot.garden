@@ -18,7 +18,7 @@
             <UTextarea v-model="form.template" :rows="3" placeholder="{{title}} {{link}}" class="w-full" />
           </UFormField>
           <UFormField label="Images" name="includeImages">
-            <UCheckbox v-model="form.includeImages" label="Include images" description="Attach images from feed items to posts" />
+            <UCheckbox v-model="form.includeImages" label="Include images" :description="imageDescription" />
           </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
@@ -36,7 +36,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="form.sourceId" :template="form.template" :include-images="form.includeImages" />
+    <TemplatePreview :source-id="form.sourceId" :template="form.template" :include-images="form.includeImages" @image-stats="imageStats = $event" />
   </div>
 </template>
 
@@ -51,6 +51,13 @@ const selectedTarget = computed(() => (targets.value || []).find(t => t.id === f
 
 const DEFAULT_TEMPLATES: Record<string, string> = { bluesky: '{{title}} {{link}}' }
 
+const imageStats = ref({ total: 0, withImages: 0 })
+const imageDescription = computed(() => {
+  if (imageStats.value.withImages > 0) {
+    return `Attach images from feed items to posts (${imageStats.value.withImages} of ${imageStats.value.total} recent items have images)`
+  }
+  return 'Attach images from feed items to posts'
+})
 const form = reactive({ sourceId: '', targetId: '', template: '{{title}} {{link}}', includeImages: false })
 
 watch(() => form.targetId, () => {

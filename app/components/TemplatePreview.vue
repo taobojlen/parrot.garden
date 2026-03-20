@@ -34,7 +34,7 @@
           <p v-else class="text-xs text-neutral-400">
             {{ item.graphemes }}/300 graphemes
           </p>
-          <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first">
+          <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first" :delay-duration="0">
             <UButton
               size="xs"
               variant="soft"
@@ -98,6 +98,10 @@ const props = defineProps<{
   includeImages?: boolean
   connectionId?: string
   hasUnsavedChanges?: boolean
+}>()
+
+const emit = defineEmits<{
+  imageStats: [{ total: number; withImages: number }]
 }>()
 
 const feedItems = ref<any[]>([])
@@ -188,6 +192,8 @@ watch(() => props.sourceId, async (id) => {
   loading.value = true
   try {
     feedItems.value = await $fetch(`/api/sources/${id}/items`)
+    const withImages = feedItems.value.filter(i => i.images?.length > 0).length
+    emit('imageStats', { total: feedItems.value.length, withImages })
   } catch {
     feedItems.value = []
   } finally {
