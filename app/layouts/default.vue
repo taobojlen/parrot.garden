@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between h-14">
           <div class="flex items-center gap-6">
             <NuxtLink to="/" class="text-lg font-bold">
-              Parrot
+              🦜 parrot.garden
             </NuxtLink>
             <UNavigationMenu
               v-if="session?.data?.user"

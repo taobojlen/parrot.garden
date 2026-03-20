@@ -66,10 +66,10 @@ const footer: React.CSSProperties = {
 export default function MagicLinkEmail({ url }: { url: string }) {
   return e(Html, null,
     e(Head),
-    e(Preview, null, 'Sign in to Parrot'),
+    e(Preview, null, 'Sign in to parrot.garden'),
     e(Body, { style: body },
       e(Container, { style: container },
-        e(Heading, { style: heading }, 'Sign in to Parrot'),
+        e(Heading, { style: heading }, 'Sign in to parrot.garden'),
         e(Section, { style: section },
           e(Text, { style: text },
             'Click the button below to sign in. This link expires in 5 minutes.',

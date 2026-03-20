@@ -1,6 +1,6 @@
 <template>
   <UPageHero
-    title="Parrot"
+    title="parrot.garden"
     description="Cross-post your RSS feeds to Bluesky, Mastodon, and more."
     :links="[
       { label: 'Get Started', to: '/dashboard', icon: 'i-lucide-arrow-right', trailing: true, size: 'lg' },

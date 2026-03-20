@@ -3,7 +3,7 @@
     <UCard>
       <template #header>
         <div class="flex flex-col gap-1">
-          <h1 class="text-2xl font-bold">Sign in to Parrot</h1>
+          <h1 class="text-2xl font-bold">Sign in to parrot.garden</h1>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">We'll send you a magic link</p>
         </div>
       </template>

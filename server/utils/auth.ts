@@ -25,9 +25,9 @@ export function serverAuth() {
             const resend = new Resend(config.resendApiKey)
             const html = await render(MagicLinkEmail({ url }))
             await resend.emails.send({
-              from: config.resendFromEmail || 'Parrot <noreply@parrot.app>',
+              from: config.resendFromEmail || 'parrot.garden <noreply@parrot.garden>',
               to: email,
-              subject: 'Sign in to Parrot',
+              subject: 'Sign in to parrot.garden',
               html,
             })
           },
