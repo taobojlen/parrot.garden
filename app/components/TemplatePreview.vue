@@ -17,6 +17,16 @@
         class="group relative p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
       >
         <p>{{ item.rendered }}</p>
+        <div v-if="item.images.length" class="flex gap-2 mt-2">
+          <img
+            v-for="(img, j) in item.images"
+            :key="j"
+            :src="img.url"
+            :alt="img.alt"
+            :title="img.alt || undefined"
+            class="w-16 h-16 object-cover rounded border border-neutral-200 dark:border-neutral-700"
+          />
+        </div>
         <p v-if="item.truncated" class="text-xs text-warning mt-1">
           Truncated ({{ item.graphemes }}/300 graphemes)
         </p>
@@ -61,6 +71,7 @@
 const props = defineProps<{
   sourceId: string
   template: string
+  includeImages?: boolean
   connectionId?: string
 }>()
 
@@ -152,6 +163,7 @@ const previewItems = computed(() => {
       rendered: truncate(rendered, 300),
       graphemes: rawGraphemes,
       truncated: rawGraphemes > 300,
+      images: props.includeImages ? (item.images ?? []) : [],
     }
   })
 })

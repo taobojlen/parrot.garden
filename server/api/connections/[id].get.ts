@@ -13,6 +13,7 @@ export default eventHandler(async (event) => {
     targetName: schema.targets.name,
     targetType: schema.targets.type,
     template: schema.connections.template,
+    includeImages: schema.connections.includeImages,
     enabled: schema.connections.enabled,
     createdAt: schema.connections.createdAt,
   })

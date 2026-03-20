@@ -37,7 +37,7 @@ export default eventHandler(async (event) => {
   // Post to target
   const credentials = JSON.parse(conn.target.credentials)
   if (conn.target.type === 'bluesky') {
-    await postToBluesky(credentials, text)
+    await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined)
   }
 
   return { ok: true, text }

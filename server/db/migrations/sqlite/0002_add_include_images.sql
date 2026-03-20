@@ -1,0 +1,1 @@
+ALTER TABLE `connection` ADD `include_images` integer DEFAULT false NOT NULL;

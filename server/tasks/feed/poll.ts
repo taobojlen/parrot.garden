@@ -91,7 +91,7 @@ export default defineTask({
           try {
             const credentials = JSON.parse(target.credentials)
             if (target.type === 'bluesky') {
-              await postToBluesky(credentials, text)
+              await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined)
             }
 
             if (existing) {

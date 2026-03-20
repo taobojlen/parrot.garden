@@ -73,6 +73,7 @@ export const connections = sqliteTable('connection', {
   sourceId: text('source_id').notNull().references(() => sources.id, { onDelete: 'cascade' }),
   targetId: text('target_id').notNull().references(() => targets.id, { onDelete: 'cascade' }),
   template: text('template').notNull(),
+  includeImages: integer('include_images', { mode: 'boolean' }).notNull().default(false),
   enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),

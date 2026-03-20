@@ -17,6 +17,9 @@
           <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{content}}, {{author}}, {{date}}">
             <UTextarea v-model="form.template" :rows="3" class="w-full" />
           </UFormField>
+          <UFormField label="Images" name="includeImages">
+            <UCheckbox v-model="form.includeImages" label="Include images" description="Attach images from feed items to posts" />
+          </UFormField>
           <UFormField label="Status" name="enabled">
             <USwitch v-model="form.enabled" label="Active" :description="form.enabled ? 'Connection is active and will cross-post new items' : 'Connection is paused'" />
           </UFormField>
@@ -46,7 +49,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :connection-id="id" />
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" />
 
     <!-- Test Post -->
     <UCard class="mt-6">
@@ -96,6 +99,7 @@ const { data: connection } = await useFetch(`/api/connections/${id}`)
 
 const form = reactive({
   template: connection.value?.template ?? '{{title}} {{link}}',
+  includeImages: connection.value?.includeImages ?? false,
   enabled: connection.value?.enabled ?? true,
 })
 
