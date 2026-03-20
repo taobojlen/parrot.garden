@@ -20,11 +20,7 @@ export default defineNuxtConfig({
   },
 
   hub: {
-    db: {
-      dialect: 'sqlite',
-      driver: 'd1',
-      connection: { databaseId: '7d8c14ce-b905-4974-aced-b700006eff96' },
-    },
+    db: 'sqlite',
   },
 
   nitro: {
