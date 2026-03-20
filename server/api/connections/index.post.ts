@@ -1,5 +1,4 @@
 import { and, eq } from 'drizzle-orm'
-import { chunk, D1_BATCH_SIZE } from '../../utils/batch'
 
 const DEFAULT_TEMPLATES: Record<string, string> = {
   bluesky: '{{title}} {{link}}',
@@ -36,27 +35,6 @@ export default eventHandler(async (event) => {
   }
 
   await db.insert(schema.connections).values(connection)
-
-  // Mark all existing feed items as 'skipped' so only new items get posted
-  const items = await fetchAndParseFeed(source.url)
-  for (const batch of chunk(items, D1_BATCH_SIZE)) {
-    await db.insert(schema.postLogs).values(batch.map(item => ({
-      id: crypto.randomUUID(),
-      connectionId: connection.id,
-      itemGuid: item.guid,
-      itemTitle: item.title,
-      itemLink: item.link,
-      itemDescription: item.description,
-      itemContent: item.content,
-      itemAuthor: item.author,
-      itemPubDate: item.pubDate,
-      status: 'skipped' as const,
-      attempts: 0,
-      error: null,
-      postedAt: now,
-      updatedAt: now,
-    }))).onConflictDoNothing()
-  }
 
   return connection
 })

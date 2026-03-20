@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { processConnectionItems, type ExistingLog } from '../../utils/poll'
-import { chunk, D1_BATCH_SIZE } from '../../utils/batch'
+import { processConnectionItems, filterNewItems, type ExistingLog } from '../../utils/poll'
+import { chunk, D1_BATCH_SIZE, SOURCE_ITEM_BATCH_SIZE } from '../../utils/batch'
 
 const MAX_ITEMS_PER_FEED = 10
 
@@ -44,9 +44,33 @@ export default defineTask({
 
       items = items.slice(0, MAX_ITEMS_PER_FEED)
 
+      // Upsert items into source_items (preserves original createdAt via onConflictDoNothing)
+      const sourceId = connections[0].source.id
+      const now = new Date()
+      for (const batch of chunk(items, SOURCE_ITEM_BATCH_SIZE)) {
+        await db.insert(schema.sourceItems).values(batch.map(item => ({
+          id: crypto.randomUUID(),
+          sourceId,
+          itemGuid: item.guid,
+          createdAt: now,
+        }))).onConflictDoNothing()
+      }
+
+      // Read back first-seen dates for filtering
+      const sourceItemRows = await db.select({
+        itemGuid: schema.sourceItems.itemGuid,
+        createdAt: schema.sourceItems.createdAt,
+      })
+        .from(schema.sourceItems)
+        .where(eq(schema.sourceItems.sourceId, sourceId))
+      const sourceItemDates = new Map(sourceItemRows.map(r => [r.itemGuid, r.createdAt]))
+
       for (const conn of connections) {
         const connectionId = conn.connection.id
         const target = conn.target
+
+        // Only process items discovered after this connection was created
+        const newItems = filterNewItems(items, sourceItemDates, conn.connection.createdAt)
 
         // Check which items already have post_log entries
         const existingLogs = await db.select({
@@ -61,7 +85,7 @@ export default defineTask({
         const existingGuids = new Map<string, ExistingLog>(existingLogs.map((l: ExistingLog) => [l.itemGuid, l]))
 
         const result = await processConnectionItems({
-          items,
+          items: newItems,
           existingLogs: existingGuids,
           connectionId,
           template: conn.connection.template,

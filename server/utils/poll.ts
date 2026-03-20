@@ -1,6 +1,18 @@
 import { renderTemplate, truncatePost } from './template'
 import type { FeedItem, FeedImage } from './rss'
 
+export function filterNewItems(
+  items: FeedItem[],
+  sourceItemDates: Map<string, Date>,
+  connectionCreatedAt: Date,
+): FeedItem[] {
+  return items.filter((item) => {
+    const firstSeen = sourceItemDates.get(item.guid)
+    if (!firstSeen) return true
+    return firstSeen > connectionCreatedAt
+  })
+}
+
 const MAX_RETRY_ATTEMPTS = 5
 
 export interface ExistingLog {

@@ -79,6 +79,15 @@ export const connections = sqliteTable('connection', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })
 
+export const sourceItems = sqliteTable('source_item', {
+  id: text('id').primaryKey(),
+  sourceId: text('source_id').notNull().references(() => sources.id, { onDelete: 'cascade' }),
+  itemGuid: text('item_guid').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+}, (table) => [
+  uniqueIndex('source_item_guid_idx').on(table.sourceId, table.itemGuid),
+])
+
 export const postLogs = sqliteTable('post_log', {
   id: text('id').primaryKey(),
   connectionId: text('connection_id').notNull().references(() => connections.id, { onDelete: 'cascade' }),
