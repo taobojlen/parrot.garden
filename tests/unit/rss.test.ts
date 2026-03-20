@@ -245,6 +245,47 @@ describe('parseFeed', () => {
     ])
   })
 
+  it('extracts images when all quotes are entity-encoded in content:encoded', () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+      <item>
+        <title>Entity Encoded</title>
+        <link>https://example.com/entity</link>
+        <content:encoded>&lt;p&gt;Hello&lt;/p&gt;
+&lt;img src=&quot;https://example.com/photo.jpg&quot; alt=&quot;A nice photo&quot; /&gt;</content:encoded>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items[0].images).toEqual([
+      { url: 'https://example.com/photo.jpg', alt: 'A nice photo' },
+    ])
+  })
+
+  it('preserves entity text in code blocks through double-encoding', () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <item>
+        <title>Code Post</title>
+        <link>https://example.com/code</link>
+        <description>&lt;p&gt;Use &lt;code&gt;&amp;amp;amp;&lt;/code&gt; to write an ampersand in HTML&lt;/p&gt;</description>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items[0].description).toBe('Use &amp; to write an ampersand in HTML')
+  })
+
+  it('preserves alt text with embedded quotes at same encoding level', () => {
+    const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+      <item>
+        <title>Quoted</title>
+        <link>https://example.com/quoted</link>
+        <content:encoded>&lt;img src=&quot;https://example.com/screenshot.png&quot; alt=&quot;GitHub screenshot: &quot;Merging this PR will improve performance by 6.3x&quot;&quot; /&gt;</content:encoded>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items[0].images).toEqual([
+      { url: 'https://example.com/screenshot.png', alt: 'GitHub screenshot: "Merging this PR will improve performance by 6.3x"' },
+    ])
+  })
+
   it('extracts images from img tags in Atom content', () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">

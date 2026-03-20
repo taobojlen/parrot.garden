@@ -19,26 +19,22 @@ export interface FeedItem {
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
-  processEntities: false, // We handle entity decoding manually to avoid double-decoding
+  processEntities: true,
+  htmlEntities: true,
 })
 
-function decodeEntitiesOnce(text: string): string {
+function decodeHtmlEntities(text: string): string {
   return text
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&') // Must be last to avoid double-decoding
-}
-
-function decodeEntities(text: string): string {
-  // Decode twice to handle double-encoded entities (e.g. &amp;gt; → &gt; → >)
-  return decodeEntitiesOnce(decodeEntitiesOnce(text))
+    .replace(/&amp;/g, '&') // Must be last
 }
 
 function stripHtml(html: string): string {
-  return decodeEntities(html)
+  return decodeHtmlEntities(html)
     .replace(/<[^>]*>/g, '')
     .replace(/\[([^\]]*)\]\(([^)]+)\)/g, '$1 ($2)')
     .trim()
@@ -46,33 +42,16 @@ function stripHtml(html: string): string {
 
 const MAX_IMAGES = 4
 
-function decodeHtmlStructure(text: string): string {
-  // Decode entities needed to parse HTML tags (< > &), but preserve quote
-  // entities (&quot; &apos;) so regex can correctly identify attribute boundaries.
-  // Two passes handle double-encoded entities (e.g. &amp;lt; → &lt; → <).
-  let result = text
-  for (let i = 0; i < 2; i++) {
-    result = result
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&') // Must be last
-  }
-  return result
-}
-
 function extractImagesFromHtml(html: string): FeedImage[] {
   if (!html) return []
-  // Decode structural entities to find HTML tags, but preserve quote entities
-  // (&quot; &apos;) so attribute value boundaries aren't broken by quotes in values.
-  const decoded = decodeHtmlStructure(String(html))
+  const decoded = String(html)
   const images: FeedImage[] = []
   const imgRegex = /<img\s[^>]*?src=["']([^"']+)["'][^>]*?>/gi
   let match
   while ((match = imgRegex.exec(decoded)) !== null) {
-    const url = decodeEntities(match[1])
-    const altMatch = match[0].match(/alt=["']([^"']*)["']/)
-    images.push({ url, alt: altMatch ? decodeEntities(altMatch[1]) : '' })
+    const url = decodeHtmlEntities(match[1])
+    const altMatch = match[0].match(/alt=["'](.*?)["'](?=[\s/>])/)
+    images.push({ url, alt: altMatch ? decodeHtmlEntities(altMatch[1]) : '' })
   }
   return images
 }
@@ -141,11 +120,11 @@ function parseRssItems(channel: any): FeedItem[] {
   const items = Array.isArray(channel.item) ? channel.item : channel.item ? [channel.item] : []
   return items.map((item: any) => ({
     guid: item.guid?.['#text'] ?? item.guid ?? item.link ?? '',
-    title: decodeEntities(String(item.title ?? '')),
+    title: String(item.title ?? ''),
     link: item.link ?? '',
     description: item.description ? stripHtml(String(item.description)) : '',
     content: item['content:encoded'] ? stripHtml(String(item['content:encoded'])) : '',
-    author: decodeEntities(String(item.author ?? item['dc:creator'] ?? '')),
+    author: String(item.author ?? item['dc:creator'] ?? ''),
     pubDate: toISODate(item.pubDate),
     images: collectImages(item, 'description', 'content:encoded'),
   }))
@@ -161,11 +140,11 @@ function parseAtomEntries(feed: any): FeedItem[] {
     const summaryRaw = entry.summary?.['#text'] ?? entry.summary ?? ''
     return {
       guid: entry.id ?? link ?? '',
-      title: decodeEntities(String(entry.title?.['#text'] ?? entry.title ?? '')),
+      title: String(entry.title?.['#text'] ?? entry.title ?? ''),
       link,
       description: entry.summary ? stripHtml(String(summaryRaw)) : '',
       content: entry.content ? stripHtml(String(contentRaw)) : '',
-      author: decodeEntities(String(entry.author?.name ?? '')),
+      author: String(entry.author?.name ?? ''),
       pubDate: toISODate(entry.updated ?? entry.published),
       images: collectImages(entry, 'content', 'summary'),
     }
