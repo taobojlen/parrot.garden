@@ -191,7 +191,7 @@ watch(() => props.sourceId, async (id) => {
   if (!id) return
   loading.value = true
   try {
-    feedItems.value = await $fetch(`/api/sources/${id}/items`)
+    feedItems.value = await $fetch<typeof feedItems.value>(`/api/sources/${id}/items`)
     const withImages = feedItems.value.filter(i => i.images?.length > 0).length
     emit('imageStats', { total: feedItems.value.length, withImages })
   } catch {

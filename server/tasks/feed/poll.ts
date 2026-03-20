@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { processConnectionItems } from '../../utils/poll'
+import { processConnectionItems, type ExistingLog } from '../../utils/poll'
 import { chunk, D1_BATCH_SIZE } from '../../utils/batch'
 
 const MAX_ITEMS_PER_FEED = 10
@@ -58,7 +58,7 @@ export default defineTask({
           .from(schema.postLogs)
           .where(eq(schema.postLogs.connectionId, connectionId))
 
-        const existingGuids = new Map(existingLogs.map(l => [l.itemGuid, l]))
+        const existingGuids = new Map<string, ExistingLog>(existingLogs.map((l: ExistingLog) => [l.itemGuid, l]))
 
         const result = await processConnectionItems({
           items,

@@ -44,10 +44,10 @@
 const { data: sources } = await useFetch('/api/sources')
 const { data: targets } = await useFetch('/api/targets')
 
-const sourceOptions = computed(() => (sources.value || []).map(s => ({ label: s.name, value: s.id })))
-const targetOptions = computed(() => (targets.value || []).map(t => ({ label: `${t.name} (${t.type})`, value: t.id })))
+const sourceOptions = computed(() => (sources.value || []).map((s: any) => ({ label: s.name, value: s.id })))
+const targetOptions = computed(() => (targets.value || []).map((t: any) => ({ label: `${t.name} (${t.type})`, value: t.id })))
 
-const selectedTarget = computed(() => (targets.value || []).find(t => t.id === form.targetId))
+const selectedTarget = computed(() => (targets.value || []).find((t: any) => t.id === form.targetId))
 
 const DEFAULT_TEMPLATES: Record<string, string> = { bluesky: '{{title}} {{link}}' }
 

@@ -25,6 +25,7 @@ export default eventHandler(async (event) => {
   }
 
   const item = items[body.itemIndex]
+  if (!item) throw createError({ statusCode: 400, statusMessage: 'Item not found' })
 
   // Render template
   const text = truncatePost(

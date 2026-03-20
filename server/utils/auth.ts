@@ -5,7 +5,7 @@ import { magicLink } from 'better-auth/plugins'
 import { Resend } from 'resend'
 import MagicLinkEmail from '../emails/magic-link'
 
-let _auth: ReturnType<typeof betterAuth>
+let _auth: any
 
 export function serverAuth() {
   if (!_auth) {

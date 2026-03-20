@@ -19,7 +19,7 @@ export default eventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'No items in feed' })
   }
 
-  const item = items[0]
+  const item = items[0]!
 
   // Render template
   const text = truncatePost(

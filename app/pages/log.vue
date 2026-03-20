@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold">Post Log</h1>
-      <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="refresh">
+      <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="() => refresh()">
         Refresh
       </UButton>
     </div>
@@ -36,7 +36,7 @@
             color="warning"
             icon="i-lucide-rotate-ccw"
             :loading="retrying === row.original.id"
-            @click="retry(row.original.id)"
+            @click="retry(row.original.id as string)"
           >
             Retry
           </UButton>

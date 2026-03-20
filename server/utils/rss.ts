@@ -49,9 +49,9 @@ function extractImagesFromHtml(html: string): FeedImage[] {
   const imgRegex = /<img\s[^>]*?src=["']([^"']+)["'][^>]*?>/gi
   let match
   while ((match = imgRegex.exec(decoded)) !== null) {
-    const url = decodeHtmlEntities(match[1])
+    const url = decodeHtmlEntities(match[1] ?? '')
     const altMatch = match[0].match(/alt=["'](.*?)["'](?=[\s/>])/)
-    images.push({ url, alt: altMatch ? decodeHtmlEntities(altMatch[1]) : '' })
+    images.push({ url, alt: altMatch ? decodeHtmlEntities(altMatch[1] ?? '') : '' })
   }
   return images
 }
@@ -109,7 +109,7 @@ function collectImages(item: any, ...htmlFields: string[]): FeedImage[] {
 function toISODate(dateStr: string | undefined): string {
   if (!dateStr) return ''
   try {
-    return new Date(dateStr).toISOString().split('T')[0]
+    return new Date(dateStr).toISOString().split('T')[0] ?? ''
   }
   catch {
     return ''

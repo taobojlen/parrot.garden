@@ -14,7 +14,7 @@ export default eventHandler(async (event) => {
     const type = body.type ?? (
       await db.select({ type: schema.targets.type }).from(schema.targets)
         .where(and(eq(schema.targets.id, id), eq(schema.targets.userId, user.id)))
-        .then(rows => rows[0]?.type)
+        .then((rows: { type: string }[]) => rows[0]?.type)
     )
 
     if (!type) throw createError({ statusCode: 404, statusMessage: 'Target not found' })
