@@ -10,8 +10,8 @@
           <UFormField label="Name" name="name" required>
             <UInput v-model="form.name" placeholder="My Bluesky" icon="i-lucide-type" required class="w-full" />
           </UFormField>
-          <UFormField label="Type" name="type" required>
-            <USelect v-model="form.type" :items="targetTypes" value-key="value" required class="w-full" />
+          <UFormField label="Type" name="type">
+            <USelect v-model="form.type" :items="targetTypes" value-key="value" disabled class="w-full" />
           </UFormField>
           <template v-if="form.type === 'bluesky'">
             <USeparator label="Update Credentials" />
@@ -21,6 +21,13 @@
             <UFormField label="App Password" name="appPassword" hint="Leave blank to keep existing credentials">
               <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" icon="i-lucide-key-round" class="w-full" />
             </UFormField>
+          </template>
+          <template v-if="form.type === 'mastodon'">
+            <USeparator />
+            <UFormField label="Instance">
+              <p class="text-sm text-neutral-500">{{ target?.instanceUrl }}</p>
+            </UFormField>
+            <p class="text-xs text-neutral-400">Credentials are managed via OAuth. Delete and re-create the target to re-authorize.</p>
           </template>
         </div>
         <div class="flex items-center gap-2 mt-6">
@@ -62,7 +69,10 @@
 const route = useRoute()
 const id = route.params.id as string
 
-const targetTypes = [{ label: 'Bluesky', value: 'bluesky' }]
+const targetTypes = [
+  { label: 'Bluesky', value: 'bluesky' },
+  { label: 'Mastodon', value: 'mastodon' },
+]
 
 const { data: target } = await useFetch(`/api/targets/${id}`)
 
@@ -88,9 +98,9 @@ async function handleSubmit() {
   saving.value = true
   error.value = ''
   try {
-    const body: Record<string, unknown> = { ...form }
-    // Only include credentials if both fields have been filled in
-    if (credentials.handle && credentials.appPassword) {
+    const body: Record<string, unknown> = { name: form.name }
+    // Only include credentials for bluesky if both fields have been filled in
+    if (form.type === 'bluesky' && credentials.handle && credentials.appPassword) {
       body.credentials = { handle: credentials.handle, appPassword: credentials.appPassword }
     }
     await $fetch(`/api/targets/${id}`, { method: 'PUT', body })

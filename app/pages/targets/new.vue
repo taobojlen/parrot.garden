@@ -22,9 +22,18 @@
               <UInput v-model="credentials.appPassword" type="password" placeholder="xxxx-xxxx-xxxx-xxxx" icon="i-lucide-key-round" required class="w-full" />
             </UFormField>
           </template>
+          <template v-if="form.type === 'mastodon'">
+            <USeparator />
+            <UFormField label="Instance URL" name="instanceUrl" required>
+              <UInput v-model="mastodonInstance" placeholder="mastodon.social" icon="i-lucide-globe" required class="w-full" />
+            </UFormField>
+          </template>
         </div>
         <div class="flex items-center gap-2 mt-6">
-          <UButton type="submit" :loading="loading">Add Target</UButton>
+          <UButton v-if="form.type === 'mastodon'" type="submit" :loading="loading" icon="i-lucide-external-link">
+            Authorize with Mastodon
+          </UButton>
+          <UButton v-else type="submit" :loading="loading">Add Target</UButton>
           <UButton to="/dashboard" variant="ghost" color="neutral">Cancel</UButton>
         </div>
       </UForm>
@@ -41,20 +50,32 @@
 </template>
 
 <script setup lang="ts">
-const targetTypes = [{ label: 'Bluesky', value: 'bluesky' }]
+const targetTypes = [
+  { label: 'Bluesky', value: 'bluesky' },
+  { label: 'Mastodon', value: 'mastodon' },
+]
 const form = reactive({ name: '', type: 'bluesky' })
 const credentials = reactive({ handle: '', appPassword: '' })
+const mastodonInstance = ref('')
 const loading = ref(false)
 const error = ref('')
 
-const formState = computed(() => ({ ...form, ...credentials }))
+const formState = computed(() => ({ ...form, ...credentials, instanceUrl: mastodonInstance.value }))
 
 async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    const created = await $fetch('/api/targets', { method: 'POST', body: { ...form, credentials } })
-    navigateTo(`/targets/${created.id}`)
+    if (form.type === 'mastodon') {
+      const { url } = await $fetch('/api/targets/mastodon/authorize', {
+        method: 'POST',
+        body: { instanceUrl: mastodonInstance.value, targetName: form.name },
+      })
+      window.location.href = url
+    } else {
+      const created = await $fetch('/api/targets', { method: 'POST', body: { ...form, credentials } })
+      navigateTo(`/targets/${created.id}`)
+    }
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to add target'
   } finally {
