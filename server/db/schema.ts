@@ -106,3 +106,18 @@ export const postLogs = sqliteTable('post_log', {
 }, (table) => [
   uniqueIndex('connection_item_idx').on(table.connectionId, table.itemGuid),
 ])
+
+export const mastodonApps = sqliteTable('mastodon_app', {
+  id: text('id').primaryKey(),
+  instanceUrl: text('instance_url').notNull().unique(),
+  clientId: text('client_id').notNull(),
+  clientSecret: text('client_secret').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+})
+
+export const mastodonOauthState = sqliteTable('mastodon_oauth_state', {
+  id: text('id').primaryKey(),
+  nonce: text('nonce').notNull().unique(),
+  userId: text('user_id').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+})
