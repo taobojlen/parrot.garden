@@ -45,6 +45,7 @@ export default eventHandler(async (event) => {
   })
 
   const state = btoa(JSON.stringify({ nonce, targetName: body.targetName, instanceUrl }))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
   const authUrl = `https://${instanceUrl}/oauth/authorize?` + new URLSearchParams({
     client_id: app.clientId,

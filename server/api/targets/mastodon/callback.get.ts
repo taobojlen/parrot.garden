@@ -13,7 +13,8 @@ export default eventHandler(async (event) => {
   // Parse and verify state
   let state: { nonce: string; targetName: string; instanceUrl: string }
   try {
-    state = JSON.parse(atob(stateParam))
+    const padded = stateParam.replace(/-/g, '+').replace(/_/g, '/') + '=='.slice(0, (4 - stateParam.length % 4) % 4)
+    state = JSON.parse(atob(padded))
   } catch {
     throw createError({ statusCode: 400, statusMessage: 'Invalid state parameter' })
   }
