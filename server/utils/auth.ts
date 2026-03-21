@@ -38,7 +38,7 @@ export function serverAuth() {
   return _auth
 }
 
-function getBaseURL(): string {
+export function getBaseURL(): string {
   const config = useRuntimeConfig()
   if (config.betterAuthUrl) return config.betterAuthUrl
   try {
