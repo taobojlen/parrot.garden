@@ -21,7 +21,7 @@
             v-for="source in sources"
             :key="source.id"
             :to="`/sources/${source.id}`"
-            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            class="block p-2 rounded-lg hover:bg-white/10"
           >
             <p class="font-medium text-sm">{{ source.name }}</p>
             <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate">{{ source.url }}</p>
@@ -48,7 +48,7 @@
             v-for="target in targets"
             :key="target.id"
             :to="`/targets/${target.id}`"
-            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            class="block p-2 rounded-lg hover:bg-white/10"
           >
             <div class="flex items-center gap-2">
               <span class="font-medium text-sm">{{ target.name }}</span>
@@ -77,7 +77,7 @@
             v-for="conn in connections"
             :key="conn.id"
             :to="`/connections/${conn.id}`"
-            class="block p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            class="block p-2 rounded-lg hover:bg-white/10"
           >
             <div class="flex items-center gap-2">
               <span class="font-medium text-sm">{{ conn.sourceName }} &rarr; {{ conn.targetName }}</span>

@@ -12,6 +12,10 @@ export default defineNuxtConfig({
       ],
     },
   },
+
+  experimental: {
+    viewTransition: true,
+  },
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module'],
   css: ['~/assets/css/main.css'],
 

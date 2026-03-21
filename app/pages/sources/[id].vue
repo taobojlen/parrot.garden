@@ -23,12 +23,20 @@
             variant="soft"
             :loading="deleting"
             icon="i-lucide-trash-2"
-            @click="handleDelete"
+            @click="deleteOpen = true"
           >
             Delete
           </UButton>
         </div>
       </UForm>
+      <ConfirmModal
+        v-model:open="deleteOpen"
+        title="Delete source"
+        message="Delete this source? All associated connections will also be removed."
+        confirm-label="Delete"
+        :loading="deleting"
+        @confirm="handleDelete"
+      />
       <UAlert
         v-if="error"
         color="error"
@@ -123,6 +131,7 @@ const form = reactive({
 const saving = ref(false)
 const saved = ref(false)
 const deleting = ref(false)
+const deleteOpen = ref(false)
 const error = ref('')
 
 watch(() => ({ ...form }), () => { saved.value = false })
@@ -141,7 +150,6 @@ async function handleSubmit() {
 }
 
 async function handleDelete() {
-  if (!confirm('Delete this source? All associated connections will also be removed.')) return
   deleting.value = true
   error.value = ''
   try {

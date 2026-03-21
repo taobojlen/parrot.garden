@@ -32,12 +32,20 @@
             variant="soft"
             :loading="deleting"
             icon="i-lucide-trash-2"
-            @click="handleDelete"
+            @click="deleteOpen = true"
           >
             Delete
           </UButton>
         </div>
       </UForm>
+      <ConfirmModal
+        v-model:open="deleteOpen"
+        title="Delete target"
+        message="Delete this target? All associated connections will also be removed."
+        confirm-label="Delete"
+        :loading="deleting"
+        @confirm="handleDelete"
+      />
       <UAlert
         v-if="error"
         color="error"
@@ -71,6 +79,7 @@ const formState = computed(() => ({ ...form, ...credentials }))
 const saving = ref(false)
 const saved = ref(false)
 const deleting = ref(false)
+const deleteOpen = ref(false)
 const error = ref('')
 
 watch(() => ({ ...form, ...credentials }), () => { saved.value = false })
@@ -96,7 +105,6 @@ async function handleSubmit() {
 }
 
 async function handleDelete() {
-  if (!confirm('Delete this target? All associated connections will also be removed.')) return
   deleting.value = true
   error.value = ''
   try {

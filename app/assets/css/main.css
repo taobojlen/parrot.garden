@@ -1,8 +1,91 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+@theme {
+  --color-charcoal: #313921;
+  --color-onyx: #13160D;
+  --color-pale-sky: #D1E0E8;
+  --color-sky-reflection: #86ACCF;
+  --color-dusty-olive: #6E7545;
+
+  --color-sky-50: #f0f6fa;
+  --color-sky-100: #d1e0e8;
+  --color-sky-200: #b5d0de;
+  --color-sky-300: #9bc1d4;
+  --color-sky-400: #86ACCF;
+  --color-sky-500: #78a3c4;
+  --color-sky-600: #6a96b8;
+  --color-sky-700: #5a89ac;
+  --color-sky-800: #4a7a9e;
+  --color-sky-900: #1a2e44;
+  --color-sky-950: #0d1a2a;
+}
+
 @layer base {
   button, a, [role="button"] {
     cursor: pointer;
   }
+
+  :root {
+    --ui-bg: transparent;
+    --ui-text-highlighted: var(--color-pale-sky);
+    --ui-text-muted: var(--color-sky-reflection);
+    --ui-border: rgba(255, 255, 255, 0.15);
+  }
+
+  .bg-default {
+    --tw-bg-opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .ring-default {
+    --tw-ring-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .divide-default > :not(:last-child) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  input, textarea, select {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--color-pale-sky) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: rgba(209, 224, 232, 0.5) !important;
+  }
+
+  .text-dimmed {
+    color: rgba(209, 224, 232, 0.5) !important;
+  }
+
+  body {
+    background-color: var(--color-onyx);
+    color: var(--color-pale-sky);
+  }
 }
+
+[data-slot="overlay"] {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-slot="content"] {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.25) !important;
+}
+
+:root {
+  --ui-primary: var(--color-sky-400);
+  --ui-error: #e05a5a;
+  --ui-bg-elevated: rgba(255, 255, 255, 0.1);
+  --ui-bg-accented: rgba(255, 255, 255, 0.15);
+  --ui-border: rgba(255, 255, 255, 0.15);
+  --ui-border-muted: rgba(255, 255, 255, 0.1);
+  --ui-border-accented: rgba(255, 255, 255, 0.2);
+}
+

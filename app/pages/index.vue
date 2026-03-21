@@ -1,34 +1,45 @@
 <template>
-  <UPageHero
-    title="parrot.garden"
-    description="Cross-post your RSS feeds to Bluesky, Mastodon, and more."
-    :links="[
-      { label: 'Get Started', to: '/dashboard', icon: 'i-lucide-arrow-right', trailing: true, size: 'lg' },
-      { label: 'Learn More', to: '#features', variant: 'soft', color: 'neutral', size: 'lg' }
-    ]"
-  />
+  <div class="relative w-full h-screen overflow-hidden">
+    <img
+      src="/hero-canopy.png"
+      alt=""
+      class="absolute inset-0 w-full h-full object-cover"
+    />
 
-  <div id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto py-12">
-    <UCard>
-      <div class="flex flex-col items-center text-center gap-3 p-2">
-        <UIcon name="i-lucide-rss" class="text-3xl text-primary" />
-        <h3 class="font-semibold text-lg">RSS Sources</h3>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">Connect any RSS or Atom feed as a content source.</p>
+    <!-- Bottom fade into background -->
+    <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-onyx to-transparent" />
+
+    <!-- Frosted glass panel -->
+    <div class="absolute inset-0 flex items-start justify-center pt-[8%] p-6">
+      <div
+        class="relative backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl
+               px-10 py-12 sm:px-14 sm:py-16 max-w-lg w-full text-center
+               shadow-2xl shadow-black/20"
+      >
+        <h1 class="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-3">
+          🦜 parrot.garden
+        </h1>
+        <p class="text-lg sm:text-xl text-white/80 mb-8 leading-relaxed">
+          Cross-post your RSS feeds to Bluesky, Mastodon, and more.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <UButton
+            to="/dashboard"
+            size="lg"
+            icon="i-lucide-arrow-right"
+            trailing
+            class="justify-center"
+          >
+            Get Started
+          </UButton>
+        </div>
       </div>
-    </UCard>
-    <UCard>
-      <div class="flex flex-col items-center text-center gap-3 p-2">
-        <UIcon name="i-lucide-share-2" class="text-3xl text-primary" />
-        <h3 class="font-semibold text-lg">Social Targets</h3>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">Post to Bluesky with more platforms coming soon.</p>
-      </div>
-    </UCard>
-    <UCard>
-      <div class="flex flex-col items-center text-center gap-3 p-2">
-        <UIcon name="i-lucide-link" class="text-3xl text-primary" />
-        <h3 class="font-semibold text-lg">Connections</h3>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">Map sources to targets with customizable templates.</p>
-      </div>
-    </UCard>
+    </div>
   </div>
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+  layout: 'landing',
+})
+</script>

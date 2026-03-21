@@ -4,17 +4,17 @@
       <div class="flex items-center gap-2">
         <UIcon name="i-lucide-eye" class="text-primary" />
         <h2 class="font-semibold">Preview</h2>
-        <span class="text-sm text-neutral-500 dark:text-neutral-400">How your recent posts would appear</span>
+        <span class="text-sm text-pale-sky/60">How your recent posts would appear</span>
       </div>
     </template>
-    <div v-if="loading" class="py-4 text-center text-sm text-neutral-400">
+    <div v-if="loading" class="py-4 text-center text-sm text-pale-sky/50">
       Loading feed items...
     </div>
     <div v-else-if="previewItems.length" class="space-y-3">
       <div
         v-for="(item, i) in previewItems"
         :key="i"
-        class="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 text-sm whitespace-pre-wrap"
+        class="p-3 rounded-lg bg-white/8 border border-white/10 text-sm whitespace-pre-wrap text-pale-sky"
       >
         <p>{{ item.rendered }}</p>
         <div v-if="item.images.length" class="flex gap-2 mt-2">
@@ -24,14 +24,14 @@
             :src="img.url"
             :alt="img.alt"
             :title="img.alt || undefined"
-            class="w-16 h-16 object-cover rounded border border-neutral-200 dark:border-neutral-700"
+            class="w-16 h-16 object-cover rounded border border-white/15"
           />
         </div>
         <div class="flex items-center justify-between mt-3">
           <p v-if="item.truncated" class="text-xs text-warning">
             Truncated ({{ item.graphemes }}/300 graphemes)
           </p>
-          <p v-else class="text-xs text-neutral-400">
+          <p v-else class="text-xs text-pale-sky/70">
             {{ item.graphemes }}/300 graphemes
           </p>
           <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first" :delay-duration="0">
@@ -74,13 +74,13 @@
         />
       </div>
     </div>
-    <p v-else class="py-4 text-center text-sm text-neutral-400">No items in feed</p>
+    <p v-else class="py-4 text-center text-sm text-pale-sky/50">No items in feed</p>
 
     <UModal v-model:open="confirmOpen">
       <template #content>
         <div class="p-6 space-y-4">
           <h3 class="font-semibold text-lg">Confirm post</h3>
-          <p class="text-sm text-neutral-600 dark:text-neutral-300 whitespace-pre-wrap">{{ confirmText }}</p>
+          <p class="text-sm text-pale-sky/80 whitespace-pre-wrap">{{ confirmText }}</p>
           <div class="flex justify-end gap-2">
             <UButton variant="ghost" @click="confirmOpen = false">Cancel</UButton>
             <UButton color="primary" icon="i-lucide-send" :loading="postingIndex !== null" @click="confirmAndPost">Post</UButton>
