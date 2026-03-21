@@ -59,4 +59,36 @@ describe('truncatePost', () => {
     const graphemeCount = [...new Intl.Segmenter().segment(result)].length
     expect(graphemeCount).toBeLessThanOrEqual(300)
   })
+
+  it('counts URLs at urlCost when option is provided', () => {
+    const url = 'https://example.com/very-long-path'
+    const text = `Check this out ${url}`
+    const result = truncatePost(text, 40, { urlCost: 23 })
+    expect(result).toBe(text)
+  })
+
+  it('truncates non-URL content when urlCost makes text exceed limit', () => {
+    const prefix = 'A'.repeat(280)
+    const url = 'https://example.com/path'
+    const text = `${prefix} ${url}`
+    const result = truncatePost(text, 300, { urlCost: 23 })
+    expect(result.endsWith(url)).toBe(true)
+    expect(result.includes('…')).toBe(true)
+  })
+
+  it('handles multiple URLs with urlCost', () => {
+    const url1 = 'https://example.com/first-very-long-url-path'
+    const url2 = 'https://example.com/second-very-long-url-path'
+    const text = `See ${url1} and ${url2}`
+    const result = truncatePost(text, 60, { urlCost: 23 })
+    expect(result).toBe(text)
+  })
+
+  it('without urlCost, counts URLs at real length (existing behavior)', () => {
+    const url = 'https://example.com/very-long-path'
+    const text = `Check this out ${url}`
+    const result = truncatePost(text, 40)
+    expect(result.length).toBeLessThanOrEqual(40)
+    expect(result.includes('…')).toBe(true)
+  })
 })
