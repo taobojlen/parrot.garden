@@ -33,6 +33,11 @@
     --ui-border: rgba(255, 255, 255, 0.15);
   }
 
+  .dashboard-cards .p-4,
+  .dashboard-cards .sm\:p-6 {
+    padding: 0.75rem !important;
+  }
+
   .bg-default {
     --tw-bg-opacity: 1;
     background-color: rgba(255, 255, 255, 0.1) !important;
@@ -63,7 +68,7 @@
   }
 
   body {
-    background-color: var(--color-onyx);
+    background-color: var(--color-sky-950);
     color: var(--color-pale-sky);
   }
 }

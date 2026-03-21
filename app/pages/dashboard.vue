@@ -2,7 +2,21 @@
   <div>
     <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-3 gap-6 dashboard-cards">
+      <UCard v-for="i in 3" :key="i">
+        <template #header>
+          <div class="flex items-center gap-2">
+            <USkeleton class="h-5 w-5 rounded" />
+            <USkeleton class="h-5 w-24" />
+          </div>
+        </template>
+        <div class="space-y-3">
+          <USkeleton v-for="j in 2" :key="j" class="h-10 w-full rounded-lg" />
+        </div>
+      </UCard>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 dashboard-cards">
       <!-- Sources -->
       <UCard>
         <template #header>
@@ -94,7 +108,13 @@
 </template>
 
 <script setup lang="ts">
-const { data: sources } = useFetch('/api/sources')
-const { data: targets } = useFetch('/api/targets')
-const { data: connections } = useFetch('/api/connections')
+const { data: sources, status: sourcesStatus } = useFetch('/api/sources')
+const { data: targets, status: targetsStatus } = useFetch('/api/targets')
+const { data: connections, status: connectionsStatus } = useFetch('/api/connections')
+
+const loading = computed(() =>
+  sourcesStatus.value === 'pending'
+  || targetsStatus.value === 'pending'
+  || connectionsStatus.value === 'pending',
+)
 </script>

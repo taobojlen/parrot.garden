@@ -9,13 +9,11 @@ export default defineNuxtConfig({
     head: {
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'preload', as: 'image', href: '/hero-canopy.png' },
       ],
     },
   },
 
-  experimental: {
-    viewTransition: true,
-  },
   modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module'],
   css: ['~/assets/css/main.css'],
 

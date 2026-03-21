@@ -12,14 +12,14 @@
     <!-- Frosted glass panel -->
     <div class="absolute inset-0 flex items-start justify-center pt-[8%] p-6">
       <div
-        class="relative backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl
+        class="relative backdrop-blur-xl bg-black/15 border border-white/20 rounded-3xl
                px-10 py-12 sm:px-14 sm:py-16 max-w-lg w-full text-center
                shadow-2xl shadow-black/20"
       >
         <h1 class="text-4xl sm:text-5xl font-bold text-white tracking-tight mb-3">
           🦜 parrot.garden
         </h1>
-        <p class="text-lg sm:text-xl text-white/80 mb-8 leading-relaxed">
+        <p class="text-lg sm:text-xl text-white mb-8 leading-relaxed drop-shadow-md">
           Cross-post your RSS feeds to Bluesky, Mastodon, and more.
         </p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -28,7 +28,7 @@
             size="lg"
             icon="i-lucide-arrow-right"
             trailing
-            class="justify-center"
+            class="justify-center !bg-white/20 !text-white hover:!bg-white/30"
           >
             Get Started
           </UButton>
