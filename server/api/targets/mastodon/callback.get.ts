@@ -40,10 +40,9 @@ export default eventHandler(async (event) => {
     .where(eq(schema.mastodonOauthState.id, oauthState.id))
 
   // Get cached app registration
-  const app = await db.select()
+  const [app] = await db.select()
     .from(schema.mastodonApps)
     .where(eq(schema.mastodonApps.instanceUrl, state.instanceUrl))
-    .then(rows => rows[0])
 
   if (!app) {
     throw createError({ statusCode: 400, statusMessage: 'App registration not found' })

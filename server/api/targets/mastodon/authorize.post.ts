@@ -19,10 +19,9 @@ export default eventHandler(async (event) => {
   // Get or create app registration
   const redirectUri = `${getBaseURL()}/api/targets/mastodon/callback`
 
-  let app = await db.select()
+  let [app] = await db.select()
     .from(schema.mastodonApps)
     .where(eq(schema.mastodonApps.instanceUrl, instanceUrl))
-    .then(rows => rows[0])
 
   if (!app) {
     const registered = await registerMastodonApp(instanceUrl, redirectUri)
