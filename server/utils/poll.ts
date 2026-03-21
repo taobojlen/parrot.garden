@@ -59,6 +59,8 @@ export async function processConnectionItems(opts: {
   template: string
   includeImages: boolean
   target: { type: string; credentials: string }
+  maxCharacters: number
+  urlCost?: number
   postFn: (credentials: any, text: string, images?: FeedImage[]) => Promise<void>
 }): Promise<ProcessResult> {
   const { items, existingLogs, connectionId, template, includeImages, target, postFn } = opts
@@ -91,7 +93,8 @@ export async function processConnectionItems(opts: {
         author: item.author,
         date: item.pubDate,
       }),
-      300,
+      opts.maxCharacters,
+      opts.urlCost !== undefined ? { urlCost: opts.urlCost } : undefined,
     )
 
     try {
