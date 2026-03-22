@@ -17,10 +17,10 @@
           </UFormField>
           <template v-if="form.type === 'bluesky'">
             <USeparator label="Update Credentials" />
-            <UFormField label="Handle" name="handle" hint="Leave blank to keep existing credentials">
+            <UFormField label="Handle" name="handle" description="Leave blank to keep existing credentials">
               <UInput v-model="credentials.handle" placeholder="Enter new handle to update" icon="i-lucide-at-sign" class="w-full" />
             </UFormField>
-            <UFormField label="App Password" name="appPassword" hint="Leave blank to keep existing credentials">
+            <UFormField label="App Password" name="appPassword" description="Leave blank to keep existing credentials">
               <UInput v-model="credentials.appPassword" type="password" placeholder="Enter new app password to update" icon="i-lucide-key-round" class="w-full" />
             </UFormField>
           </template>
@@ -64,12 +64,12 @@
       />
     </UCard>
     <UCard class="mt-4">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p class="font-medium text-sm">Create a connection</p>
           <p class="text-xs text-pale-sky">Connect an RSS source to post to this target</p>
         </div>
-        <UButton :to="`/connections/new?targetId=${id}`" icon="i-lucide-plus" variant="soft" size="sm">
+        <UButton :to="`/connections/new?targetId=${id}`" icon="i-lucide-plus" variant="soft" size="sm" class="self-start sm:self-auto shrink-0">
           New Connection
         </UButton>
       </div>

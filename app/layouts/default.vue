@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex flex-col min-h-screen text-pale-sky">
     <GlassSwitcher v-if="session?.data?.user" :items="navItems" />
-    <div v-if="session?.data?.user" class="fixed top-5 right-5 z-50">
+    <div v-if="session?.data?.user" class="fixed top-[24px] right-5 z-50">
       <GlassButton icon="i-lucide-log-out" title="Sign out" @click="handleSignOut" />
     </div>
     <UContainer class="flex-1">

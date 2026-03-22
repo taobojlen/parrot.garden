@@ -20,7 +20,7 @@
   background-color: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
-  color: rgba(209, 224, 232, 0.5);
+  color: rgba(209, 224, 232, 0.65);
   font-size: 13px;
   font-weight: 500;
   box-shadow:
@@ -37,7 +37,7 @@
 }
 
 .glass-footer a {
-  color: rgba(209, 224, 232, 0.6);
+  color: rgba(209, 224, 232, 0.75);
   text-decoration: none;
   transition: color 200ms;
 }

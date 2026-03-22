@@ -1,9 +1,9 @@
 <template>
   <div>
     <!-- Hero -->
-    <div class="relative w-full h-[60vh] min-h-[420px]">
+    <div class="relative w-full h-[50vh] sm:h-[60vh] min-h-[420px]">
       <!-- Frosted glass panel -->
-      <div class="absolute inset-0 flex items-start justify-center pt-[4%] p-6">
+      <div class="absolute inset-0 flex items-start justify-center pt-[18%] sm:pt-[4%] p-6">
         <div
           class="relative landing-glass
                  px-10 py-12 sm:px-14 sm:py-16 max-w-2xl w-full text-center"
@@ -33,7 +33,7 @@
     </div>
 
     <!-- Content sections -->
-    <div class="landing-cards max-w-2xl mx-auto px-6 pb-20 -mt-16 space-y-8">
+    <div class="landing-cards max-w-2xl mx-auto px-6 pb-20 space-y-8">
 
       <!-- POSSE explainer -->
       <UCard>

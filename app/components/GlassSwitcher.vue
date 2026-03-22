@@ -83,7 +83,7 @@ const activeIndex = computed(() => {
   height: 100%;
   box-sizing: border-box;
   border-radius: 99em;
-  color: rgba(209, 224, 232, 0.5);
+  color: rgba(209, 224, 232, 0.7);
   text-decoration: none;
   white-space: nowrap;
   font-size: 14px;
