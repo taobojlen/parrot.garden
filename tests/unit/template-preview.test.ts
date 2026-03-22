@@ -72,7 +72,7 @@ describe('TemplatePreview post confirmation', () => {
 
   it('does not post immediately when Post button is clicked', async () => {
     const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1' },
+      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
       global: { stubs },
     })
     await flushPromises()
@@ -94,7 +94,7 @@ describe('TemplatePreview post confirmation', () => {
 
   it('opens confirmation modal with post content on click', async () => {
     const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1' },
+      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
       global: { stubs },
     })
     await flushPromises()
@@ -112,7 +112,7 @@ describe('TemplatePreview post confirmation', () => {
 
   it('posts only after confirming in the modal', async () => {
     const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1' },
+      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
       global: { stubs },
     })
     await flushPromises()
@@ -139,7 +139,7 @@ describe('TemplatePreview post confirmation', () => {
 
   it('does not post when Cancel is clicked in the modal', async () => {
     const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1' },
+      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
       global: { stubs },
     })
     await flushPromises()
