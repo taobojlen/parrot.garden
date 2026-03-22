@@ -29,9 +29,11 @@ type DiscoverResult =
 
 **Notes:**
 
-- Resolve relative feed URLs against the page URL
-- Extract `href` and `title` attributes from each `<link>` element
-- Reuse the existing fetch + XML parsing from `fetchAndParseFeed`
+- Always attempt `parseFeed` first regardless of Content-Type; catch parse errors and fall through to HTML link discovery
+- Use regex to extract `<link>` tags from the HTML — no HTML parsing library needed since `<link>` elements are well-structured and appear in the document `<head>`
+- Resolve relative feed URLs against the page URL using `new URL(href, pageUrl)`
+- Extract `href` and `title` attributes from each `<link>` element; if `title` is missing, use the feed URL as the display title
+- Discovered feed validation defers to the existing `POST /api/sources` create endpoint — `discoverFeeds` does not validate that discovered URLs are actually working feeds
 
 ### API Endpoint: `POST /api/sources/discover`
 
@@ -67,15 +69,12 @@ Unit tests for `discoverFeeds`:
 
 - Direct RSS feed URL → returns `{ type: 'feed', url }`
 - HTML page with one `<link rel="alternate" type="application/rss+xml">` → returns single discovered feed
-- HTML page with multiple feed links → returns all discovered feeds with titles
+- HTML page with one `<link rel="alternate" type="application/atom+xml">` → returns single discovered feed (Atom)
+- HTML page with multiple feed links (mixed RSS and Atom) → returns all discovered feeds with titles
+- HTML page with feed link missing `title` attribute → uses URL as fallback title
 - HTML page with no feed links → throws error
 - Unreachable URL → throws error
 - Relative feed URLs resolved against page URL
-
-API endpoint tests:
-
-- Requires authentication
-- Delegates to `discoverFeeds` and returns result
 
 ## Scope
 
