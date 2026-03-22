@@ -59,6 +59,10 @@ RSS Source → (feed:poll task every 5min) → parse items → render template �
 
 `NUXT_BETTER_AUTH_SECRET`, `NUXT_BETTER_AUTH_URL`, `NUXT_RESEND_API_KEY`, `NUXT_RESEND_FROM_EMAIL`
 
+## Development practices
+
+- **Always use red/green TDD.** Write a failing test first, then write the minimal code to make it pass, then refactor. No implementation code without a failing test.
+
 <!-- skilld -->
 Before modifying code, evaluate each installed skill against the current task.
 For each skill, determine YES/NO relevance and invoke all YES skills before proceeding.
