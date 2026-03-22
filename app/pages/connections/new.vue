@@ -58,7 +58,8 @@ const imageDescription = computed(() => {
   }
   return 'Attach images from feed items to posts'
 })
-const form = reactive({ sourceId: '', targetId: '', template: '{{title}} {{link}}', includeImages: false })
+const route = useRoute()
+const form = reactive({ sourceId: '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: false })
 
 watch(() => form.targetId, () => {
   if (selectedTarget.value) {

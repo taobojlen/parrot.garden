@@ -62,6 +62,17 @@
         class="mt-4"
       />
     </UCard>
+    <UCard class="mt-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="font-medium text-sm">Create a connection</p>
+          <p class="text-xs text-neutral-400">Connect an RSS source to post to this target</p>
+        </div>
+        <UButton :to="`/connections/new?targetId=${id}`" icon="i-lucide-plus" variant="soft" size="sm">
+          New Connection
+        </UButton>
+      </div>
+    </UCard>
   </div>
 </template>
 
