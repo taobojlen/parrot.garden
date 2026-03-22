@@ -1,10 +1,12 @@
 <template>
   <div class="mx-auto max-w-lg">
-    <div class="flex items-center gap-2 mb-6">
-      <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
-      <h1 class="text-2xl font-bold ">Edit Source</h1>
-    </div>
     <UCard>
+      <template #header>
+        <div class="flex items-center gap-2">
+          <UButton to="/dashboard" variant="ghost" color="neutral" icon="i-lucide-arrow-left" size="sm" />
+          <h1 class="text-2xl font-bold">Edit Source</h1>
+        </div>
+      </template>
       <UForm :state="form" @submit="handleSubmit">
         <div class="space-y-4">
           <UFormField label="Name" name="name" required>

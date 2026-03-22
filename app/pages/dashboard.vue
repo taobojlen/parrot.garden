@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
-
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-3 gap-6 dashboard-cards">
       <UCard v-for="i in 3" :key="i">
         <template #header>

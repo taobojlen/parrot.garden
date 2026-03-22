@@ -1,6 +1,6 @@
 <template>
   <div class="relative min-h-screen text-pale-sky">
-    <header class="border-b border-white/10 backdrop-blur-xl bg-white/8">
+    <header class="border-b border-white/10 backdrop-blur-xl bg-black/60">
       <UContainer>
         <div class="flex items-center justify-between h-14">
           <div class="flex items-center gap-6">

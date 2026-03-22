@@ -40,9 +40,9 @@
 
   .bg-default {
     --tw-bg-opacity: 1;
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
     backdrop-filter: blur(24px);
-    box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
   }
 
   .ring-default {
@@ -54,7 +54,7 @@
   }
 
   input, textarea, select {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(0, 0, 0, 0.15) !important;
     color: var(--color-pale-sky) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
   }
@@ -67,6 +67,7 @@
     color: rgba(209, 224, 232, 0.5) !important;
   }
 
+
   body {
     background-color: var(--color-sky-950);
     color: var(--color-pale-sky);
@@ -78,17 +79,18 @@
 }
 
 [data-slot="content"] {
-  background-color: rgba(255, 255, 255, 0.12) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
 }
 
 :root {
   --ui-primary: var(--color-sky-400);
   --ui-error: #e05a5a;
-  --ui-bg-elevated: rgba(255, 255, 255, 0.1);
-  --ui-bg-accented: rgba(255, 255, 255, 0.15);
+  --ui-bg-elevated: rgba(0, 0, 0, 0.15);
+  --ui-bg-accented: rgba(0, 0, 0, 0.2);
   --ui-border: rgba(255, 255, 255, 0.15);
   --ui-border-muted: rgba(255, 255, 255, 0.1);
   --ui-border-accented: rgba(255, 255, 255, 0.2);

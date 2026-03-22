@@ -9,8 +9,7 @@
       @load="bgLoaded = true"
     />
     <div
-      class="fixed inset-0 -z-10 bg-onyx transition-opacity duration-700 ease-in-out"
-      :class="isLanding ? 'opacity-0' : 'opacity-70'"
+      class="fixed inset-0 -z-10 bg-onyx opacity-0"
     />
     <NuxtLayout>
       <NuxtPage />
@@ -19,8 +18,6 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute()
-const isLanding = computed(() => route.path === '/')
 const bgLoaded = ref(false)
 const bgImg = ref<HTMLImageElement>()
 

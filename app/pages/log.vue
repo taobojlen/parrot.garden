@@ -1,12 +1,14 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Post Log</h1>
-      <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="() => refresh()">
-        Refresh
-      </UButton>
-    </div>
     <UCard>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold">Post Log</h1>
+          <UButton variant="ghost" color="neutral" icon="i-lucide-refresh-cw" @click="() => refresh()">
+            Refresh
+          </UButton>
+        </div>
+      </template>
       <UTable
         v-if="logs?.length"
         :data="logs"
