@@ -48,6 +48,17 @@
         class="mt-4"
       />
     </UCard>
+    <UCard class="mt-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <p class="font-medium text-sm">Create a connection</p>
+          <p class="text-xs text-pale-sky">Connect this source to a target to start cross-posting</p>
+        </div>
+        <UButton :to="`/connections/new?sourceId=${id}`" icon="i-lucide-plus" variant="soft" size="sm" class="self-start sm:self-auto shrink-0">
+          New Connection
+        </UButton>
+      </div>
+    </UCard>
 
     <!-- Recent Feed Items -->
     <UCard class="mt-6">

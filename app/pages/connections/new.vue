@@ -64,7 +64,7 @@ const imageDescription = computed(() => {
   return 'Attach images from feed items to posts'
 })
 const route = useRoute()
-const form = reactive({ sourceId: '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: true })
+const form = reactive({ sourceId: (route.query.sourceId as string) || '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: true })
 const templateRef = ref()
 
 function insertVariable(variable: string) {
