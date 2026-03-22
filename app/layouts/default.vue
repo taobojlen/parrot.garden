@@ -1,14 +1,15 @@
 <template>
-  <div class="relative min-h-screen text-pale-sky">
+  <div class="relative flex flex-col min-h-screen text-pale-sky">
     <GlassSwitcher v-if="session?.data?.user" :items="navItems" />
     <div v-if="session?.data?.user" class="fixed top-5 right-5 z-50">
       <GlassButton icon="i-lucide-log-out" title="Sign out" @click="handleSignOut" />
     </div>
-    <UContainer>
+    <UContainer class="flex-1">
       <main class="pt-24 pb-8">
         <slot />
       </main>
     </UContainer>
+    <GlassFooter />
   </div>
 </template>
 

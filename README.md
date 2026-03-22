@@ -1,75 +1,68 @@
-# Nuxt Minimal Starter
+# parrot.garden
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Automatically share your blog posts to social media. **parrot.garden** connects RSS feeds to Bluesky and Mastodon, posting new items as they appear — an implementation of the [POSSE](https://indieweb.org/POSSE) pattern (Publish Own Site, Syndicate Elsewhere).
 
-## Setup
+## How it works
 
-Make sure to install dependencies:
+1. Add an RSS feed as a **Source**
+2. Connect a Bluesky or Mastodon account as a **Target**
+3. Create a **Connection** between a source and target with a customizable template
+4. New feed items are automatically posted to your social accounts every 5 minutes
+
+Templates support variables like `{{title}}`, `{{link}}`, `{{description}}`, `{{content}}`, `{{author}}`, and `{{date}}` with automatic truncation to fit platform character limits.
+
+## Stack
+
+- **Frontend:** Vue 3 + Nuxt 4, Tailwind CSS v4, Nuxt UI
+- **Backend:** Nitro server routes
+- **Database:** Drizzle ORM + SQLite (Cloudflare D1 in production)
+- **Auth:** better-auth with magic link email (via Resend)
+- **Deployment:** Cloudflare Workers via NuxtHub
+
+## Development
+
+### Setup
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+### Dev server
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
 pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Starts the development server at `http://localhost:3000`.
 
-Build the application for production:
+### Environment variables
+
+Create a `.env` file with:
+
+```
+NUXT_BETTER_AUTH_SECRET=
+NUXT_BETTER_AUTH_URL=
+NUXT_RESEND_API_KEY=
+NUXT_RESEND_FROM_EMAIL=
+```
+
+### Testing
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npx vitest            # Watch mode
+npx vitest run        # Run once
 ```
 
-Locally preview production build:
+### Build
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+pnpm build            # Production build
+pnpm preview          # Preview production build locally
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### Database migrations
+
+```bash
+npx drizzle-kit generate  # Generate migration after schema changes
+npx drizzle-kit migrate   # Apply migrations
+```
