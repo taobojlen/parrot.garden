@@ -2,6 +2,7 @@
   "name": "parrot",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@10.18.1",
   "scripts": {
     "build": "NODE_OPTIONS='--max-old-space-size=4096' nuxt build",
     "dev": "nuxt dev",
