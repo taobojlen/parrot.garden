@@ -30,7 +30,7 @@ type DiscoverResult =
 **Notes:**
 
 - Always attempt `parseFeed` first regardless of Content-Type; catch parse errors and fall through to HTML link discovery
-- Use regex to extract `<link>` tags from the HTML — no HTML parsing library needed since `<link>` elements are well-structured and appear in the document `<head>`
+- Use an HTML parsing library (e.g., `node-html-parser` or `cheerio`) to extract `<link>` tags from the HTML
 - Resolve relative feed URLs against the page URL using `new URL(href, pageUrl)`
 - Extract `href` and `title` attributes from each `<link>` element; if `title` is missing, use the feed URL as the display title
 - Discovered feed validation defers to the existing `POST /api/sources` create endpoint — `discoverFeeds` does not validate that discovered URLs are actually working feeds
