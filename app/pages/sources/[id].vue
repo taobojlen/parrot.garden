@@ -63,15 +63,15 @@
           :key="i"
           :href="item.link"
           target="_blank"
-          class="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          class="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-white/10"
         >
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium truncate">{{ item.title || 'Untitled' }}</p>
-            <p v-if="item.pubDate" class="text-xs text-neutral-500 dark:text-neutral-400">{{ item.pubDate }}</p>
+            <p v-if="item.pubDate" class="text-xs text-sky-reflection/70">{{ item.pubDate }}</p>
           </div>
         </a>
       </div>
-      <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">
+      <p v-else class="text-sm text-sky-reflection/50 text-center py-4">
         No items in feed.
       </p>
     </UCard>
@@ -100,7 +100,7 @@
               {{ post.itemTitle || 'Untitled' }}
             </a>
             <p v-else class="text-sm font-medium truncate">{{ post.itemTitle || 'Untitled' }}</p>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">
+            <p class="text-xs text-sky-reflection/70">
               → {{ post.targetName }}
             </p>
           </div>

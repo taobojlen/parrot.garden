@@ -27,9 +27,8 @@
           <template v-if="form.type === 'mastodon'">
             <USeparator />
             <UFormField label="Instance">
-              <p class="text-sm text-neutral-500">{{ target?.instanceUrl }}</p>
+              <p class="text-sm text-sky-reflection">{{ target?.instanceUrl }}</p>
             </UFormField>
-            <p class="text-xs text-neutral-400">Credentials are managed via OAuth. Delete and re-create the target to re-authorize.</p>
           </template>
         </div>
         <div class="flex items-center gap-2 mt-6">
@@ -68,7 +67,7 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="font-medium text-sm">Create a connection</p>
-          <p class="text-xs text-neutral-400">Connect an RSS source to post to this target</p>
+          <p class="text-xs text-sky-reflection/70">Connect an RSS source to post to this target</p>
         </div>
         <UButton :to="`/connections/new?targetId=${id}`" icon="i-lucide-plus" variant="soft" size="sm">
           New Connection

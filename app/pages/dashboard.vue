@@ -36,10 +36,10 @@
             class="block p-2 rounded-lg hover:bg-white/10"
           >
             <p class="font-medium text-sm">{{ source.name }}</p>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate">{{ source.url }}</p>
+            <p class="text-xs text-sky-reflection/70 truncate">{{ source.url }}</p>
           </NuxtLink>
         </div>
-        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No sources yet</p>
+        <p v-else class="text-sm text-sky-reflection/50 text-center py-4">No sources yet</p>
       </UCard>
 
       <!-- Targets -->
@@ -68,7 +68,7 @@
             </div>
           </NuxtLink>
         </div>
-        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No targets yet</p>
+        <p v-else class="text-sm text-sky-reflection/50 text-center py-4">No targets yet</p>
       </UCard>
 
       <!-- Connections -->
@@ -99,7 +99,7 @@
             </div>
           </NuxtLink>
         </div>
-        <p v-else class="text-sm text-neutral-400 dark:text-neutral-500 text-center py-4">No connections yet</p>
+        <p v-else class="text-sm text-sky-reflection/50 text-center py-4">No connections yet</p>
       </UCard>
     </div>
   </div>
