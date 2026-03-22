@@ -42,7 +42,6 @@
     --tw-bg-opacity: 1;
     background-color: rgba(0, 0, 0, 0.45) !important;
     backdrop-filter: blur(16px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
     border-radius: 0.875rem !important;
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -93,7 +92,6 @@
 [data-slot="content"] {
   background-color: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(16px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
   border: none !important;
   border-radius: 1.25rem !important;
   box-shadow:
