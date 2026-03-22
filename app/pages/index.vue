@@ -62,17 +62,23 @@ definePageMeta({
   layout: 'landing',
 })
 
+useHead({
+  meta: [
+    { property: 'og:logo', content: 'https://parrot.garden/favicon.svg' },
+  ],
+})
+
 useSeoMeta({
-  title: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+  title: 'parrot.garden — Cross-post RSS to Bluesky & Mastodon',
   description: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
-  ogTitle: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+  ogTitle: 'parrot.garden — Cross-post RSS to Bluesky & Mastodon',
   ogDescription: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   ogType: 'website',
-  ogImage: 'https://parrot.garden/og-image.png',
+  ogImage: 'https://parrot.garden/og-image.webp',
   ogImageWidth: 1200,
   ogImageHeight: 630,
   twitterCard: 'summary_large_image',
-  twitterImage: 'https://parrot.garden/og-image.png',
+  twitterImage: 'https://parrot.garden/og-image.webp',
   twitterTitle: 'parrot.garden — Cross-post RSS feeds to social media',
   twitterDescription: 'Publish on your own site, syndicate everywhere. Cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
 })
@@ -83,7 +89,7 @@ useSchemaOrg([
     description: 'Publish on your own site, syndicate everywhere. Cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   }),
   defineWebPage({
-    name: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+    name: 'parrot.garden — Cross-post RSS to Bluesky & Mastodon',
     description: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   }),
 ])
