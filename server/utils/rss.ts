@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
+import { parse as parseHtml } from 'node-html-parser'
 
 export interface FeedImage {
   url: string
@@ -180,4 +181,41 @@ export async function fetchAndParseFeed(url: string): Promise<FeedItem[]> {
   }
   const xml = await response.text()
   return parseFeed(xml)
+}
+
+export type DiscoverResult =
+  | { type: 'feed'; url: string }
+  | { type: 'discovered'; feeds: Array<{ url: string; title: string }> }
+
+export async function discoverFeeds(url: string): Promise<DiscoverResult> {
+  const response = await fetch(url)
+  const text = await response.text()
+
+  try {
+    parseFeed(text)
+    return { type: 'feed', url }
+  }
+  catch {
+    // Not a feed, try HTML discovery
+  }
+
+  const doc = parseHtml(text)
+  const links = doc.querySelectorAll('link[rel="alternate"]')
+  const feeds = links
+    .filter((link) => {
+      const type = link.getAttribute('type') ?? ''
+      return type === 'application/rss+xml' || type === 'application/atom+xml'
+    })
+    .map((link) => {
+      const href = link.getAttribute('href') ?? ''
+      const resolvedUrl = new URL(href, url).toString()
+      const title = link.getAttribute('title') || resolvedUrl
+      return { url: resolvedUrl, title }
+    })
+
+  if (feeds.length === 0) {
+    throw new Error('No RSS feeds found on this page')
+  }
+
+  return { type: 'discovered', feeds }
 }

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { parseFeed, type FeedItem, type FeedImage } from '../../server/utils/rss'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { parseFeed, discoverFeeds, type FeedItem, type FeedImage, type DiscoverResult } from '../../server/utils/rss'
 
 const RSS_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -302,5 +302,131 @@ describe('parseFeed', () => {
     expect(items[0].images).toEqual([
       { url: 'https://example.com/atom-inline.png', alt: 'Atom inline' },
     ])
+  })
+})
+
+describe('discoverFeeds', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('returns feed result when URL is a direct RSS feed', async () => {
+    const rssXml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <title>My Blog</title>
+      <item><title>Post</title><link>https://example.com/post</link></item>
+    </channel></rss>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(rssXml, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com/feed.xml')
+    expect(result).toEqual({ type: 'feed', url: 'https://example.com/feed.xml' })
+  })
+
+  it('discovers RSS feed link from HTML page', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head>
+      <link rel="alternate" type="application/rss+xml" title="My Blog RSS" href="https://example.com/feed.xml" />
+    </head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com')
+    expect(result).toEqual({
+      type: 'discovered',
+      feeds: [{ url: 'https://example.com/feed.xml', title: 'My Blog RSS' }],
+    })
+  })
+
+  it('discovers Atom feed link from HTML page', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head>
+      <link rel="alternate" type="application/atom+xml" title="My Blog Atom" href="https://example.com/atom.xml" />
+    </head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com')
+    expect(result).toEqual({
+      type: 'discovered',
+      feeds: [{ url: 'https://example.com/atom.xml', title: 'My Blog Atom' }],
+    })
+  })
+
+  it('discovers multiple feed links with mixed types', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head>
+      <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://example.com/rss.xml" />
+      <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="https://example.com/atom.xml" />
+    </head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com')
+    expect(result).toEqual({
+      type: 'discovered',
+      feeds: [
+        { url: 'https://example.com/rss.xml', title: 'RSS Feed' },
+        { url: 'https://example.com/atom.xml', title: 'Atom Feed' },
+      ],
+    })
+  })
+
+  it('uses URL as fallback title when title attribute is missing', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head>
+      <link rel="alternate" type="application/rss+xml" href="https://example.com/feed.xml" />
+    </head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com')
+    expect(result).toEqual({
+      type: 'discovered',
+      feeds: [{ url: 'https://example.com/feed.xml', title: 'https://example.com/feed.xml' }],
+    })
+  })
+
+  it('throws when HTML page has no feed links', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head><title>No feeds here</title></head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    await expect(discoverFeeds('https://example.com')).rejects.toThrow('No RSS feeds found on this page')
+  })
+
+  it('throws when fetch fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
+
+    await expect(discoverFeeds('https://unreachable.example.com')).rejects.toThrow()
+  })
+
+  it('resolves relative feed URLs against page URL', async () => {
+    const html = `<!DOCTYPE html>
+    <html><head>
+      <link rel="alternate" type="application/rss+xml" title="Blog Feed" href="/feed.xml" />
+    </head><body></body></html>`
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(html, { status: 200 }),
+    ))
+
+    const result = await discoverFeeds('https://example.com/blog/')
+    expect(result).toEqual({
+      type: 'discovered',
+      feeds: [{ url: 'https://example.com/feed.xml', title: 'Blog Feed' }],
+    })
   })
 })
