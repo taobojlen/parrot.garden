@@ -25,6 +25,7 @@ export default defineNuxtConfig({
       include: [
         'better-auth/vue',
         'better-auth/client/plugins',
+        'posthog-js',
       ],
     },
   },
@@ -66,6 +67,11 @@ export default defineNuxtConfig({
     betterAuthUrl: '',
     resendApiKey: '',
     resendFromEmail: '',
+    public: {
+      posthogPublicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
+      posthogHost: 'https://ph.btao.org',
+      posthogDefaults: '2026-01-30'
+    },
   },
 
   site: {
