@@ -6,5 +6,9 @@ export default eventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'URL is required' })
   }
 
-  return discoverFeeds(body.url)
+  try {
+    return await discoverFeeds(body.url)
+  } catch (e: any) {
+    throw createError({ statusCode: 400, statusMessage: e.message })
+  }
 })

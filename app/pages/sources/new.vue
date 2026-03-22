@@ -7,7 +7,7 @@
           <h1 class="text-2xl font-bold">Add RSS Source</h1>
         </div>
       </template>
-      <UForm :state="form" @submit="handleSubmit">
+      <UForm :state="form" @submit="discovered ? handleSubmit() : handleDiscover()">
         <div class="space-y-4">
           <UFormField label="Name" name="name" required>
             <UInput v-model="form.name" placeholder="My Blog" icon="i-lucide-type" required class="w-full" />
@@ -18,7 +18,7 @@
             <UFormField label="Website or Feed URL" name="url" required>
               <UInput v-model="form.url" type="url" placeholder="https://example.com" icon="i-lucide-rss" required class="w-full" />
             </UFormField>
-            <UButton :loading="discovering" icon="i-lucide-search" @click="handleDiscover">Find Feed</UButton>
+            <UButton type="submit" :loading="discovering" icon="i-lucide-search">Find Feed</UButton>
           </template>
 
           <!-- Phase 2a: Single feed found -->
@@ -26,7 +26,6 @@
             <UFormField label="Feed URL" name="feedUrl">
               <p class="text-sm text-muted">{{ feedUrl }}</p>
             </UFormField>
-            <UButton variant="link" size="sm" class="p-0" @click="resetDiscovery">Change URL</UButton>
           </template>
 
           <!-- Phase 2b: Multiple feeds found -->
@@ -34,7 +33,6 @@
             <UFormField label="Select a feed" name="feedUrl" required>
               <URadioGroup v-model="feedUrl" :items="feedOptions" />
             </UFormField>
-            <UButton variant="link" size="sm" class="p-0" @click="resetDiscovery">Change URL</UButton>
           </template>
         </div>
 
@@ -92,12 +90,6 @@ async function handleDiscover() {
   } finally {
     discovering.value = false
   }
-}
-
-function resetDiscovery() {
-  discovered.value = null
-  feedUrl.value = ''
-  error.value = ''
 }
 
 async function handleSubmit() {
