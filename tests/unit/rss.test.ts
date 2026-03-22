@@ -272,6 +272,23 @@ describe('parseFeed', () => {
     expect(items[0].description).toBe('Use &amp; to write an ampersand in HTML')
   })
 
+  it('parses feeds with more than 1000 HTML entity expansions', () => {
+    // btao.org/feed.xml has ~1033 entities which exceeds the default limit of 1000
+    const manyEntities = Array.from({ length: 300 }, (_, i) =>
+      `&lt;p&gt;Paragraph ${i}&lt;/p&gt;`,
+    ).join('')
+    const xml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <item>
+        <title>Entity Heavy Post</title>
+        <link>https://example.com/entities</link>
+        <description>${manyEntities}</description>
+      </item>
+    </channel></rss>`
+    const items = parseFeed(xml)
+    expect(items).toHaveLength(1)
+    expect(items[0].title).toBe('Entity Heavy Post')
+  })
+
   it('preserves alt text with embedded quotes at same encoding level', () => {
     const xml = `<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
       <item>

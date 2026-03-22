@@ -20,9 +20,10 @@ export interface FeedItem {
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
-  processEntities: true,
+  processEntities: {
+    maxTotalExpansions: 5000,
+  },
   htmlEntities: true,
-  entityExpansionLimit: 5000,
 })
 
 function decodeHtmlEntities(text: string): string {
