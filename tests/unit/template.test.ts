@@ -23,6 +23,17 @@ describe('renderTemplate', () => {
   })
 })
 
+describe('renderTemplate + truncatePost integration', () => {
+  it('renders title+link template for bluesky without truncating short posts', () => {
+    const rendered = renderTemplate('{{title}}\n\n{{link}}', {
+      title: 'Announcing: Parrot.garden',
+      link: 'https://btao.org/posts/2026-03-22-parrots/',
+    })
+    const result = truncatePost(rendered, 300)
+    expect(result).toBe('Announcing: Parrot.garden\n\nhttps://btao.org/posts/2026-03-22-parrots/')
+  })
+})
+
 describe('truncatePost', () => {
   it('returns text unchanged if within limit', () => {
     const result = truncatePost('Hello world', 300)
