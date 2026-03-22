@@ -16,8 +16,11 @@
             <UInput :model-value="connection ? `${connection.targetName} (${connection.targetType})` : ''" disabled icon="i-lucide-share-2" class="w-full" />
           </UFormField>
           <USeparator />
-          <UFormField label="Template" name="template" hint="Variables: {{title}}, {{link}}, {{description}}, {{content}}, {{author}}, {{date}}">
-            <UTextarea v-model="form.template" :rows="3" class="w-full" />
+          <UFormField label="Template" name="template">
+            <template #default>
+              <UTextarea ref="templateRef" v-model="form.template" :rows="3" class="w-full" />
+              <TemplateVariables @insert="insertVariable" class="mt-2" />
+            </template>
           </UFormField>
           <UFormField label="Images" name="includeImages">
             <UCheckbox v-model="form.includeImages" label="Include images" :description="imageDescription" />
@@ -82,6 +85,24 @@ const imageDescription = computed(() => {
   }
   return 'Attach images from feed items to posts'
 })
+const templateRef = ref()
+
+function insertVariable(variable: string) {
+  const el = templateRef.value?.$el?.querySelector('textarea') as HTMLTextAreaElement | undefined
+  if (!el) {
+    form.template += variable
+    return
+  }
+  const start = el.selectionStart
+  const end = el.selectionEnd
+  form.template = form.template.slice(0, start) + variable + form.template.slice(end)
+  nextTick(() => {
+    const pos = start + variable.length
+    el.focus()
+    el.setSelectionRange(pos, pos)
+  })
+}
+
 const saving = ref(false)
 const saved = ref(false)
 const deleting = ref(false)
