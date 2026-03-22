@@ -64,9 +64,9 @@ definePageMeta({
 
 useSeoMeta({
   title: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
-  description: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+  description: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   ogTitle: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
-  ogDescription: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+  ogDescription: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   ogType: 'website',
   ogImage: 'https://parrot.garden/og-image.png',
   ogImageWidth: 1200,
@@ -74,17 +74,17 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   twitterImage: 'https://parrot.garden/og-image.png',
   twitterTitle: 'parrot.garden — Cross-post RSS feeds to social media',
-  twitterDescription: 'Automatically share your RSS feeds on Bluesky, Mastodon, and more.',
+  twitterDescription: 'Publish on your own site, syndicate everywhere. Cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
 })
 
 useSchemaOrg([
   defineWebSite({
     name: 'parrot.garden',
-    description: 'Cross-post your RSS feeds to Bluesky, Mastodon, and more.',
+    description: 'Publish on your own site, syndicate everywhere. Cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   }),
   defineWebPage({
     name: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
-    description: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+    description: 'Publish on your own site, syndicate everywhere. Automatically cross-post your RSS feeds to Bluesky, Mastodon, and more — POSSE made easy.',
   }),
 ])
 </script>

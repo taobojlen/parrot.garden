@@ -71,7 +71,7 @@ export default defineNuxtConfig({
   site: {
     url: 'https://parrot.garden',
     name: 'parrot.garden',
-    description: 'Cross-post your RSS feeds to Bluesky, Mastodon, and more. Automatically share your blog posts and content across social media platforms.',
+    description: 'POSSE your content — automatically syndicate your RSS feeds to Bluesky, Mastodon, and more. Publish on your own site, share everywhere.',
     defaultLocale: 'en',
   },
 
