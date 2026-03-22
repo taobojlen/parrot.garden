@@ -41,7 +41,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="form.sourceId" :template="form.template" :include-images="form.includeImages" @image-stats="imageStats = $event" />
+    <TemplatePreview :source-id="form.sourceId" :template="form.template" :max-characters="selectedTarget?.maxCharacters ?? 300" :include-images="form.includeImages" @image-stats="imageStats = $event" />
   </div>
 </template>
 
@@ -64,7 +64,7 @@ const imageDescription = computed(() => {
   return 'Attach images from feed items to posts'
 })
 const route = useRoute()
-const form = reactive({ sourceId: '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: false })
+const form = reactive({ sourceId: '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: true })
 const templateRef = ref()
 
 function insertVariable(variable: string) {

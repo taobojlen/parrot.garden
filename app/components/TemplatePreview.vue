@@ -4,7 +4,7 @@
       <div class="flex items-center gap-2">
         <UIcon name="i-lucide-eye" class="text-primary" />
         <h2 class="font-semibold">Preview</h2>
-        <span class="text-sm text-pale-sky/60">How your recent posts would appear</span>
+        <span class="text-sm text-pale-sky">How your recent posts would appear</span>
       </div>
     </template>
     <div v-if="loading" class="py-4 text-center text-sm text-pale-sky/50">
@@ -29,10 +29,10 @@
         </div>
         <div class="flex items-center justify-between mt-3">
           <p v-if="item.truncated" class="text-xs text-warning">
-            Truncated ({{ item.graphemes }}/300 graphemes)
+            Truncated ({{ item.graphemes }}/{{ maxCharacters }} graphemes)
           </p>
           <p v-else class="text-xs text-pale-sky/70">
-            {{ item.graphemes }}/300 graphemes
+            {{ item.graphemes }}/{{ maxCharacters }} graphemes
           </p>
           <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first" :delay-duration="0">
             <UButton
@@ -95,6 +95,7 @@
 const props = defineProps<{
   sourceId: string
   template: string
+  maxCharacters: number
   includeImages?: boolean
   connectionId?: string
   hasUnsavedChanges?: boolean
@@ -207,9 +208,9 @@ const previewItems = computed(() => {
     const rendered = render(props.template, item)
     const rawGraphemes = countGraphemes(rendered)
     return {
-      rendered: truncate(rendered, 300),
+      rendered: truncate(rendered, props.maxCharacters),
       graphemes: rawGraphemes,
-      truncated: rawGraphemes > 300,
+      truncated: rawGraphemes > props.maxCharacters,
       images: props.includeImages ? (item.images ?? []) : [],
     }
   })

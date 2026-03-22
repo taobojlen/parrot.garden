@@ -29,7 +29,8 @@
   :root {
     --ui-bg: transparent;
     --ui-text-highlighted: var(--color-pale-sky);
-    --ui-text-muted: var(--color-sky-reflection);
+    --ui-text-muted: #e8f0f5;
+    --ui-text-dimmed: #e8f0f5;
     --ui-border: rgba(255, 255, 255, 0.15);
   }
 
@@ -74,8 +75,8 @@
     color: rgba(209, 224, 232, 0.5) !important;
   }
 
-  .text-dimmed {
-    color: rgba(209, 224, 232, 0.7) !important;
+  .text-dimmed, .text-muted {
+    color: var(--color-pale-sky) !important;
   }
 
 
@@ -109,7 +110,7 @@
 
 :root {
   --ui-primary: var(--color-sky-100);
-  --ui-error: #e05a5a;
+  --ui-error: #f08080;
   --ui-bg-elevated: rgba(0, 0, 0, 0.15);
   --ui-bg-accented: rgba(0, 0, 0, 0.2);
   --ui-border: rgba(255, 255, 255, 0.15);

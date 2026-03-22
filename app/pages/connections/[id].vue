@@ -62,7 +62,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" @image-stats="imageStats = $event" />
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :max-characters="connection?.maxCharacters ?? 300" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" @image-stats="imageStats = $event" />
   </div>
 </template>
 

@@ -67,7 +67,7 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="font-medium text-sm">Create a connection</p>
-          <p class="text-xs text-sky-reflection/70">Connect an RSS source to post to this target</p>
+          <p class="text-xs text-pale-sky">Connect an RSS source to post to this target</p>
         </div>
         <UButton :to="`/connections/new?targetId=${id}`" icon="i-lucide-plus" variant="soft" size="sm">
           New Connection
