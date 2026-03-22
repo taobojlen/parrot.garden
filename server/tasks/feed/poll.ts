@@ -84,6 +84,8 @@ export default defineTask({
 
         const existingGuids = new Map<string, ExistingLog>(existingLogs.map((l: ExistingLog) => [l.itemGuid, l]))
 
+        const { maxCharacters, urlCost } = getPostOptions(target)
+
         const result = await processConnectionItems({
           items: newItems,
           existingLogs: existingGuids,
@@ -91,9 +93,13 @@ export default defineTask({
           template: conn.connection.template,
           includeImages: conn.connection.includeImages,
           target: { type: target.type, credentials: target.credentials },
+          maxCharacters,
+          urlCost,
           postFn: async (credentials, text, images) => {
             if (target.type === 'bluesky') {
               await postToBluesky(credentials, text, images)
+            } else if (target.type === 'mastodon') {
+              await postToMastodon(credentials, text, images)
             }
           },
         })

@@ -9,11 +9,18 @@ export default eventHandler(async (event) => {
     userId: schema.targets.userId,
     type: schema.targets.type,
     name: schema.targets.name,
+    credentials: schema.targets.credentials,
     createdAt: schema.targets.createdAt,
     updatedAt: schema.targets.updatedAt,
   }).from(schema.targets)
     .where(and(eq(schema.targets.id, id), eq(schema.targets.userId, user.id)))
 
   if (!target) throw createError({ statusCode: 404, statusMessage: 'Target not found' })
-  return target
+
+  const { credentials, ...rest } = target
+  const result: Record<string, unknown> = { ...rest }
+  if (target.type === 'mastodon') {
+    result.instanceUrl = JSON.parse(credentials).instanceUrl
+  }
+  return result
 })

@@ -21,6 +21,7 @@ describe('processConnectionItems', () => {
     template: '{{title}} {{link}}',
     includeImages: false,
     target: { type: 'bluesky' as const, credentials: '{}' },
+    maxCharacters: 300,
   }
 
   it('creates new post_log rows for items not in existing logs', async () => {

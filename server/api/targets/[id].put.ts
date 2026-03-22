@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm'
 
 const CREDENTIAL_SHAPES: Record<string, string[]> = {
   bluesky: ['handle', 'appPassword'],
+  mastodon: [],
 }
 
 export default eventHandler(async (event) => {
@@ -38,7 +39,11 @@ export default eventHandler(async (event) => {
       }
     }
 
-    credentialsJson = JSON.stringify(credentials)
+    const finalCredentials: Record<string, unknown> = { ...credentials }
+    if (type === 'bluesky') {
+      finalCredentials.maxCharacters = 300
+    }
+    credentialsJson = JSON.stringify(finalCredentials)
   }
 
   const [updated] = await db.update(schema.targets)

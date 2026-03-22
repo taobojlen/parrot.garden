@@ -28,6 +28,8 @@ export default eventHandler(async (event) => {
   if (!item) throw createError({ statusCode: 400, statusMessage: 'Item not found' })
 
   // Render template
+  const { maxCharacters, urlCost } = getPostOptions(conn.target)
+
   const text = truncatePost(
     renderTemplate(conn.connection.template, {
       title: item.title,
@@ -37,13 +39,16 @@ export default eventHandler(async (event) => {
       author: item.author,
       date: item.pubDate,
     }),
-    300,
+    maxCharacters,
+    urlCost !== undefined ? { urlCost } : undefined,
   )
 
   // Post to target
   const credentials = JSON.parse(conn.target.credentials)
   if (conn.target.type === 'bluesky') {
     await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined)
+  } else if (conn.target.type === 'mastodon') {
+    await postToMastodon(credentials, text, conn.connection.includeImages ? item.images : undefined)
   }
 
   return { ok: true, text }

@@ -22,6 +22,8 @@ export default eventHandler(async (event) => {
   const postLog = log.post_log
 
   // Re-render and post using all stored template variables
+  const { maxCharacters, urlCost } = getPostOptions(target)
+
   const text = truncatePost(
     renderTemplate(connection.template, {
       title: postLog.itemTitle ?? '',
@@ -31,13 +33,16 @@ export default eventHandler(async (event) => {
       author: postLog.itemAuthor ?? '',
       date: postLog.itemPubDate ?? '',
     }),
-    300,
+    maxCharacters,
+    urlCost !== undefined ? { urlCost } : undefined,
   )
 
   try {
     const credentials = JSON.parse(target.credentials)
     if (target.type === 'bluesky') {
       await postToBluesky(credentials, text)
+    } else if (target.type === 'mastodon') {
+      await postToMastodon(credentials, text)
     }
 
     await db.update(schema.postLogs)

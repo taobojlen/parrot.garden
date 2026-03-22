@@ -1,5 +1,6 @@
 const CREDENTIAL_SHAPES: Record<string, string[]> = {
   bluesky: ['handle', 'appPassword'],
+  mastodon: [],
 }
 
 export default eventHandler(async (event) => {
@@ -30,13 +31,18 @@ export default eventHandler(async (event) => {
     credentials[field] = credentials[field].trim().replace(/[\u200B-\u200D\u2028-\u202F\uFEFF]/g, '')
   }
 
+  const finalCredentials: Record<string, unknown> = { ...credentials }
+  if (body.type === 'bluesky') {
+    finalCredentials.maxCharacters = 300
+  }
+
   const now = new Date()
   const target = {
     id: crypto.randomUUID(),
     userId: user.id,
     type: body.type,
     name: body.name,
-    credentials: JSON.stringify(credentials),
+    credentials: JSON.stringify(finalCredentials),
     createdAt: now,
     updatedAt: now,
   }
