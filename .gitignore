@@ -32,3 +32,6 @@ logs
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Skilld references (recreated by `skilld install`)
+.skilld

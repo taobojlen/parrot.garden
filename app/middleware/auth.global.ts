@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (to.path === '/') return
+  if (to.path === '/' || to.path === '/og-image') return
 
   const { data: session } = await useSession(useFetch)
 

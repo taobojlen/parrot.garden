@@ -61,4 +61,30 @@
 definePageMeta({
   layout: 'landing',
 })
+
+useSeoMeta({
+  title: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+  description: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+  ogTitle: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+  ogDescription: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+  ogType: 'website',
+  ogImage: 'https://parrot.garden/og-image.png',
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  twitterCard: 'summary_large_image',
+  twitterImage: 'https://parrot.garden/og-image.png',
+  twitterTitle: 'parrot.garden — Cross-post RSS feeds to social media',
+  twitterDescription: 'Automatically share your RSS feeds on Bluesky, Mastodon, and more.',
+})
+
+useSchemaOrg([
+  defineWebSite({
+    name: 'parrot.garden',
+    description: 'Cross-post your RSS feeds to Bluesky, Mastodon, and more.',
+  }),
+  defineWebPage({
+    name: 'parrot.garden — Cross-post RSS feeds to Bluesky, Mastodon & more',
+    description: 'Automatically cross-post your RSS feeds to Bluesky, Mastodon, and other social platforms. Connect your blog, podcast, or newsletter and share everywhere.',
+  }),
+])
 </script>

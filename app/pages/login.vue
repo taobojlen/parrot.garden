@@ -47,6 +47,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  robots: 'noindex, nofollow',
+})
+
 const email = ref('')
 const loading = ref(false)
 const sent = ref(false)

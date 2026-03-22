@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module', '@nuxtjs/seo'],
   css: ['~/assets/css/main.css'],
 
   vite: {
@@ -66,6 +66,29 @@ export default defineNuxtConfig({
     betterAuthUrl: '',
     resendApiKey: '',
     resendFromEmail: '',
+  },
+
+  site: {
+    url: 'https://parrot.garden',
+    name: 'parrot.garden',
+    description: 'Cross-post your RSS feeds to Bluesky, Mastodon, and more. Automatically share your blog posts and content across social media platforms.',
+    defaultLocale: 'en',
+  },
+
+  ogImage: {
+    enabled: false,
+  },
+
+  linkChecker: {
+    enabled: false,
+  },
+
+  robots: {
+    disallow: ['/dashboard', '/sources', '/targets', '/connections', '/log', '/login'],
+  },
+
+  sitemap: {
+    exclude: ['/dashboard', '/sources/**', '/targets/**', '/connections/**', '/log', '/login'],
   },
 
   sentry: {
