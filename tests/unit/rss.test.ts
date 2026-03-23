@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { parseFeed, discoverFeeds, type FeedItem, type FeedImage, type DiscoverResult } from '../../server/utils/rss'
+import { parseFeed, discoverFeeds, fetchAndParseFeed, type FeedItem, type FeedImage, type DiscoverResult } from '../../server/utils/rss'
 
 const RSS_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -322,9 +322,51 @@ describe('parseFeed', () => {
   })
 })
 
+describe('fetchAndParseFeed', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('sends a descriptive User-Agent header', async () => {
+    const rssXml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <title>My Blog</title>
+      <item><title>Post</title><link>https://example.com/post</link></item>
+    </channel></rss>`
+
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(rssXml, { status: 200 }),
+    )
+    vi.stubGlobal('fetch', mockFetch)
+
+    await fetchAndParseFeed('https://example.com/feed.xml')
+
+    const headers = mockFetch.mock.calls[0][1]?.headers
+    expect(headers).toBeDefined()
+    expect(headers['User-Agent']).toMatch(/parrot\.garden/)
+  })
+})
+
 describe('discoverFeeds', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  it('sends a descriptive User-Agent header', async () => {
+    const rssXml = `<?xml version="1.0"?><rss version="2.0"><channel>
+      <title>My Blog</title>
+      <item><title>Post</title><link>https://example.com/post</link></item>
+    </channel></rss>`
+
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(rssXml, { status: 200 }),
+    )
+    vi.stubGlobal('fetch', mockFetch)
+
+    await discoverFeeds('https://example.com/feed.xml')
+
+    const headers = mockFetch.mock.calls[0][1]?.headers
+    expect(headers).toBeDefined()
+    expect(headers['User-Agent']).toMatch(/parrot\.garden/)
   })
 
   it('returns feed result when URL is a direct RSS feed', async () => {

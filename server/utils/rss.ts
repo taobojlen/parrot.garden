@@ -175,8 +175,12 @@ export function parseFeed(xml: string): FeedItem[] {
   })
 }
 
+const RSS_USER_AGENT = 'parrot.garden/1.0 (POSSE syndication; +https://parrot.garden)'
+
 export async function fetchAndParseFeed(url: string): Promise<FeedItem[]> {
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: { 'User-Agent': RSS_USER_AGENT },
+  })
   if (!response.ok) {
     throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`)
   }
@@ -189,7 +193,9 @@ export type DiscoverResult =
   | { type: 'discovered'; feeds: Array<{ url: string; title: string }> }
 
 export async function discoverFeeds(url: string): Promise<DiscoverResult> {
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: { 'User-Agent': RSS_USER_AGENT },
+  })
   const text = await response.text()
 
   try {
