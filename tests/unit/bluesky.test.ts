@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { postToBluesky, resolvePdsUrl } from '../../server/utils/bluesky'
+import { postToBluesky, resolvePdsUrl, verifyBlueskyCredentials } from '../../server/utils/bluesky'
 import type { FeedImage } from '../../server/utils/rss'
 
 // Mock @atproto/api
@@ -397,5 +397,35 @@ describe('resolvePdsUrl', () => {
 
     await expect(resolvePdsUrl('alice.example.com', fakeFetch))
       .rejects.toThrow('No PDS service found in DID document for "did:plc:abc123"')
+  })
+})
+
+describe('verifyBlueskyCredentials', () => {
+  it('resolves PDS and attempts login', async () => {
+    await verifyBlueskyCredentials({ handle: 'test.bsky.social', appPassword: 'test-password' })
+
+    expect(mockAtpAgentConstructor).toHaveBeenCalledWith({
+      service: 'https://bsky.social',
+    })
+    expect(mockLogin).toHaveBeenCalledWith({
+      identifier: 'test.bsky.social',
+      password: 'test-password',
+    })
+  })
+
+  it('throws descriptive error when login fails', async () => {
+    mockLogin.mockRejectedValueOnce(new Error('Invalid identifier or password'))
+
+    await expect(
+      verifyBlueskyCredentials({ handle: 'test.bsky.social', appPassword: 'bad-password' }),
+    ).rejects.toThrow('Bluesky authentication failed: Invalid identifier or password')
+  })
+
+  it('throws descriptive error when PDS resolution fails', async () => {
+    mockFetch.mockImplementation(() => Promise.resolve({ ok: false }))
+
+    await expect(
+      verifyBlueskyCredentials({ handle: 'nonexistent.example.com', appPassword: 'pw' }),
+    ).rejects.toThrow('Bluesky authentication failed: Failed to resolve DID for handle "nonexistent.example.com"')
   })
 })

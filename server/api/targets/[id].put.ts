@@ -39,6 +39,15 @@ export default eventHandler(async (event) => {
       }
     }
 
+    if (type === 'bluesky') {
+      try {
+        await verifyBlueskyCredentials({ handle: credentials.handle, appPassword: credentials.appPassword })
+      }
+      catch (error) {
+        throw createError({ statusCode: 400, statusMessage: error instanceof Error ? error.message : 'Bluesky authentication failed' })
+      }
+    }
+
     const finalCredentials: Record<string, unknown> = { ...credentials }
     if (type === 'bluesky') {
       finalCredentials.maxCharacters = 300

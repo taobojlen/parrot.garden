@@ -31,6 +31,15 @@ export default eventHandler(async (event) => {
     credentials[field] = credentials[field].trim().replace(/[\u200B-\u200D\u2028-\u202F\uFEFF]/g, '')
   }
 
+  if (body.type === 'bluesky') {
+    try {
+      await verifyBlueskyCredentials({ handle: credentials.handle, appPassword: credentials.appPassword })
+    }
+    catch (error) {
+      throw createError({ statusCode: 400, statusMessage: error instanceof Error ? error.message : 'Bluesky authentication failed' })
+    }
+  }
+
   const finalCredentials: Record<string, unknown> = { ...credentials }
   if (body.type === 'bluesky') {
     finalCredentials.maxCharacters = 300

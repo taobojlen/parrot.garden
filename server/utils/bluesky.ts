@@ -70,6 +70,22 @@ async function downloadAndUploadImage(
   }
 }
 
+export async function verifyBlueskyCredentials(
+  credentials: BlueskyCredentials,
+): Promise<void> {
+  try {
+    const service = await resolvePdsUrl(credentials.handle)
+    const agent = new AtpAgent({ service })
+    await agent.login({
+      identifier: credentials.handle,
+      password: credentials.appPassword,
+    })
+  }
+  catch (error) {
+    throw new Error(`Bluesky authentication failed: ${error instanceof Error ? error.message : error}`)
+  }
+}
+
 export async function postToBluesky(
   credentials: BlueskyCredentials,
   text: string,
