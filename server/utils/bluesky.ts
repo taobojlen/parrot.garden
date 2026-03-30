@@ -6,6 +6,47 @@ interface BlueskyCredentials {
   appPassword: string
 }
 
+export async function resolvePdsUrl(
+  handle: string,
+  fetchFn: typeof fetch = fetch,
+): Promise<string> {
+  const cleanHandle = handle.replace(/^@/, '')
+
+  const resolveResponse = await fetchFn(
+    `https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle=${cleanHandle}`,
+  )
+  if (!resolveResponse.ok) {
+    throw new Error(`Failed to resolve DID for handle "${cleanHandle}"`)
+  }
+
+  const { did } = await resolveResponse.json() as { did: string }
+
+  let didDocUrl: string
+  if (did.startsWith('did:web:')) {
+    const domain = did.slice('did:web:'.length)
+    didDocUrl = `https://${domain}/.well-known/did.json`
+  }
+  else {
+    didDocUrl = `https://plc.directory/${did}`
+  }
+
+  const didDocResponse = await fetchFn(didDocUrl)
+  if (!didDocResponse.ok) {
+    throw new Error(`Failed to resolve DID document for "${did}"`)
+  }
+
+  const didDoc = await didDocResponse.json()
+  const pdsService = didDoc.service?.find(
+    (s: { id: string }) => s.id === '#atproto_pds',
+  )
+
+  if (!pdsService?.serviceEndpoint) {
+    throw new Error(`No PDS service found in DID document for "${did}"`)
+  }
+
+  return pdsService.serviceEndpoint
+}
+
 async function downloadAndUploadImage(
   agent: AtpAgent,
   image: FeedImage,
@@ -34,7 +75,8 @@ export async function postToBluesky(
   text: string,
   images?: FeedImage[],
 ): Promise<{ uri: string; cid: string }> {
-  const agent = new AtpAgent({ service: 'https://bsky.social' })
+  const service = await resolvePdsUrl(credentials.handle)
+  const agent = new AtpAgent({ service })
   await agent.login({
     identifier: credentials.handle,
     password: credentials.appPassword,
