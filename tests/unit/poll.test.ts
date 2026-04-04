@@ -252,4 +252,105 @@ describe('processConnectionItems', () => {
     expect(postedText).not.toContain(item.link)
     expect(postedText).toContain('…')
   })
+
+  describe('claimFn (atomic deduplication)', () => {
+    it('skips items when claimFn returns false (already claimed)', async () => {
+      const items = [makeFeedItem('a'), makeFeedItem('b')]
+      const postFn = vi.fn()
+      const claimFn = vi.fn()
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false)
+
+      const result = await processConnectionItems({
+        ...baseArgs,
+        items,
+        existingLogs: new Map(),
+        postFn,
+        claimFn,
+      })
+
+      expect(postFn).toHaveBeenCalledTimes(1)
+      expect(result.posted).toBe(1)
+      expect(result.skipped).toBe(1)
+    })
+
+    it('calls claimFn before postFn', async () => {
+      const items = [makeFeedItem('a')]
+      const callOrder: string[] = []
+      const claimFn = vi.fn().mockImplementation(async () => {
+        callOrder.push('claim')
+        return true
+      })
+      const postFn = vi.fn().mockImplementation(async () => {
+        callOrder.push('post')
+      })
+
+      await processConnectionItems({
+        ...baseArgs,
+        items,
+        existingLogs: new Map(),
+        postFn,
+        claimFn,
+      })
+
+      expect(callOrder).toEqual(['claim', 'post'])
+    })
+
+    it('returns updates instead of newRows when claimFn succeeds', async () => {
+      const items = [makeFeedItem('a')]
+      const claimFn = vi.fn().mockResolvedValue(true)
+      const postFn = vi.fn()
+
+      const result = await processConnectionItems({
+        ...baseArgs,
+        items,
+        existingLogs: new Map(),
+        postFn,
+        claimFn,
+      })
+
+      expect(result.newRows).toHaveLength(0)
+      expect(result.updates).toHaveLength(1)
+      expect(result.updates[0].set.status).toBe('posted')
+    })
+
+    it('does not call claimFn for items already in existingLogs', async () => {
+      const items = [makeFeedItem('a')]
+      const existingLogs = new Map<string, ExistingLog>([
+        ['a', { id: 'log-1', itemGuid: 'a', status: 'posted', attempts: 1 }],
+      ])
+      const claimFn = vi.fn()
+      const postFn = vi.fn()
+
+      await processConnectionItems({
+        ...baseArgs,
+        items,
+        existingLogs,
+        postFn,
+        claimFn,
+      })
+
+      expect(claimFn).not.toHaveBeenCalled()
+    })
+
+    it('updates claimed row to failed when postFn throws', async () => {
+      const items = [makeFeedItem('a')]
+      const claimFn = vi.fn().mockResolvedValue(true)
+      const postFn = vi.fn().mockRejectedValue(new Error('network error'))
+
+      const result = await processConnectionItems({
+        ...baseArgs,
+        items,
+        existingLogs: new Map(),
+        postFn,
+        claimFn,
+      })
+
+      expect(result.newRows).toHaveLength(0)
+      expect(result.updates).toHaveLength(1)
+      expect(result.updates[0].set.status).toBe('failed')
+      expect(result.updates[0].set.error).toBe('network error')
+      expect(result.failed).toBe(1)
+    })
+  })
 })

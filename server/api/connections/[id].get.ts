@@ -14,6 +14,7 @@ export default eventHandler(async (event) => {
     targetType: schema.targets.type,
     template: schema.connections.template,
     includeImages: schema.connections.includeImages,
+    truncateWithLink: schema.connections.truncateWithLink,
     enabled: schema.connections.enabled,
     createdAt: schema.connections.createdAt,
     targetCredentials: schema.targets.credentials,

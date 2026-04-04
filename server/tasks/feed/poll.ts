@@ -103,6 +103,14 @@ export default defineTask({
               await postToMastodon(credentials, text, images)
             }
           },
+          claimFn: async (row) => {
+            try {
+              await db.insert(schema.postLogs).values(row)
+              return true
+            } catch {
+              return false
+            }
+          },
         })
 
         // Batch-insert new post_log rows

@@ -63,8 +63,9 @@ export async function processConnectionItems(opts: {
   maxCharacters: number
   urlCost?: number
   postFn: (credentials: any, text: string, images?: FeedImage[]) => Promise<void>
+  claimFn?: (row: PostLogRow) => Promise<boolean>
 }): Promise<ProcessResult> {
-  const { items, existingLogs, connectionId, template, includeImages, target, postFn } = opts
+  const { items, existingLogs, connectionId, template, includeImages, target, postFn, claimFn } = opts
   const newRows: PostLogRow[] = []
   const updates: PostLogUpdate[] = []
   let posted = 0
@@ -104,6 +105,33 @@ export async function processConnectionItems(opts: {
       opts.urlCost !== undefined ? { urlCost: opts.urlCost } : undefined,
     )
 
+    // For new items with claimFn, atomically claim before posting
+    let claimedId: string | undefined
+    if (!existing && claimFn) {
+      const row: PostLogRow = {
+        id: crypto.randomUUID(),
+        connectionId,
+        itemGuid: item.guid,
+        itemTitle: item.title,
+        itemLink: item.link,
+        itemDescription: item.description,
+        itemContent: item.content,
+        itemAuthor: item.author,
+        itemPubDate: item.pubDate,
+        status: 'pending',
+        attempts: 0,
+        error: null,
+        postedAt: now,
+        updatedAt: now,
+      }
+      const claimed = await claimFn(row)
+      if (!claimed) {
+        skipped++
+        continue
+      }
+      claimedId = row.id
+    }
+
     try {
       const credentials = JSON.parse(target.credentials)
       await postFn(credentials, text, includeImages ? item.images : undefined)
@@ -112,6 +140,11 @@ export async function processConnectionItems(opts: {
         updates.push({
           id: existing.id,
           set: { status: 'posted', error: null, updatedAt: now },
+        })
+      } else if (claimedId) {
+        updates.push({
+          id: claimedId,
+          set: { status: 'posted', error: null, attempts: 1, updatedAt: now },
         })
       } else {
         newRows.push({
@@ -143,6 +176,16 @@ export async function processConnectionItems(opts: {
             status: 'failed',
             error: e.message,
             attempts: isPermanent ? MAX_RETRY_ATTEMPTS : attempts,
+            updatedAt: now,
+          },
+        })
+      } else if (claimedId) {
+        updates.push({
+          id: claimedId,
+          set: {
+            status: 'failed',
+            error: e.message,
+            attempts: isPermanent ? MAX_RETRY_ATTEMPTS : 1,
             updatedAt: now,
           },
         })
