@@ -25,6 +25,9 @@
           <UFormField label="Images" name="includeImages">
             <UCheckbox v-model="form.includeImages" label="Include images" :description="imageDescription" />
           </UFormField>
+          <UFormField label="Truncation" name="truncateWithLink">
+            <UCheckbox v-model="form.truncateWithLink" label="Truncate and add source link if post is too long" :disabled="templateHasLink" />
+          </UFormField>
         </div>
         <div class="flex items-center gap-2 mt-6">
           <UButton type="submit" :loading="loading">Create Connection</UButton>
@@ -41,7 +44,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="form.sourceId" :template="form.template" :max-characters="selectedTarget?.maxCharacters ?? 300" :include-images="form.includeImages" @image-stats="imageStats = $event" />
+    <TemplatePreview :source-id="form.sourceId" :template="form.template" :max-characters="selectedTarget?.maxCharacters ?? 300" :include-images="form.includeImages" :truncate-with-link="form.truncateWithLink" @image-stats="imageStats = $event" />
   </div>
 </template>
 
@@ -64,7 +67,12 @@ const imageDescription = computed(() => {
   return 'Attach images from feed items to posts'
 })
 const route = useRoute()
-const form = reactive({ sourceId: (route.query.sourceId as string) || '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: true })
+const form = reactive({ sourceId: (route.query.sourceId as string) || '', targetId: (route.query.targetId as string) || '', template: '{{title}} {{link}}', includeImages: true, truncateWithLink: false })
+const templateHasLink = computed(() => form.template.includes('{{link}}'))
+
+watch(templateHasLink, (hasLink) => {
+  if (hasLink) form.truncateWithLink = false
+})
 const templateRef = ref()
 
 function insertVariable(variable: string) {

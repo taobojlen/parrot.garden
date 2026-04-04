@@ -1,4 +1,4 @@
-import { renderTemplate, truncatePost } from './template'
+import { renderTemplate, truncatePost, graphemeLength } from './template'
 import type { FeedItem, FeedImage } from './rss'
 
 export function filterNewItems(
@@ -58,6 +58,7 @@ export async function processConnectionItems(opts: {
   connectionId: string
   template: string
   includeImages: boolean
+  truncateWithLink?: boolean
   target: { type: string; credentials: string }
   maxCharacters: number
   urlCost?: number
@@ -84,15 +85,21 @@ export async function processConnectionItems(opts: {
       continue
     }
 
+    let rendered = renderTemplate(template, {
+      title: item.title,
+      link: item.link,
+      description: item.description,
+      content: item.content,
+      author: item.author,
+      date: item.pubDate,
+    })
+
+    if (opts.truncateWithLink && graphemeLength(rendered) > opts.maxCharacters) {
+      rendered = rendered + '\n\n' + item.link
+    }
+
     const text = truncatePost(
-      renderTemplate(template, {
-        title: item.title,
-        link: item.link,
-        description: item.description,
-        content: item.content,
-        author: item.author,
-        date: item.pubDate,
-      }),
+      rendered,
       opts.maxCharacters,
       opts.urlCost !== undefined ? { urlCost: opts.urlCost } : undefined,
     )

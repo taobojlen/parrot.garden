@@ -13,7 +13,7 @@ export function renderTemplate(
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => variables[key] ?? '')
 }
 
-function graphemeLength(text: string): number {
+export function graphemeLength(text: string): number {
   return [...segmenter.segment(text)].length
 }
 

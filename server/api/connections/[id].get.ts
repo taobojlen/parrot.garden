@@ -25,6 +25,6 @@ export default eventHandler(async (event) => {
 
   if (!row) throw createError({ statusCode: 404, statusMessage: 'Connection not found' })
   const { targetCredentials, ...connection } = row
-  const maxCharacters: number = JSON.parse(targetCredentials).maxCharacters
+  const maxCharacters: number = Number(process.env.NUXT_MAX_CHARACTERS_OVERRIDE) || JSON.parse(targetCredentials).maxCharacters
   return { ...connection, maxCharacters }
 })

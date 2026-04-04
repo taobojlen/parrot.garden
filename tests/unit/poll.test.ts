@@ -192,4 +192,64 @@ describe('processConnectionItems', () => {
       undefined,
     )
   })
+
+  it('appends link and truncates when truncateWithLink is enabled and text exceeds limit', async () => {
+    const item = makeFeedItem('a')
+    item.title = 'A'.repeat(50)
+    const postFn = vi.fn()
+
+    await processConnectionItems({
+      ...baseArgs,
+      template: '{{title}}',
+      maxCharacters: 40,
+      truncateWithLink: true,
+      items: [item],
+      existingLogs: new Map(),
+      postFn,
+    })
+
+    const postedText = postFn.mock.calls[0][1] as string
+    expect(postedText).toContain(item.link)
+    expect(postedText).toContain('…')
+  })
+
+  it('does not append link when truncateWithLink is enabled but text fits', async () => {
+    const item = makeFeedItem('a')
+    item.title = 'Short'
+    const postFn = vi.fn()
+
+    await processConnectionItems({
+      ...baseArgs,
+      template: '{{title}}',
+      maxCharacters: 300,
+      truncateWithLink: true,
+      items: [item],
+      existingLogs: new Map(),
+      postFn,
+    })
+
+    const postedText = postFn.mock.calls[0][1] as string
+    expect(postedText).toBe('Short')
+    expect(postedText).not.toContain(item.link)
+  })
+
+  it('does not append link when truncateWithLink is disabled and text exceeds limit', async () => {
+    const item = makeFeedItem('a')
+    item.title = 'A'.repeat(50)
+    const postFn = vi.fn()
+
+    await processConnectionItems({
+      ...baseArgs,
+      template: '{{title}}',
+      maxCharacters: 40,
+      truncateWithLink: false,
+      items: [item],
+      existingLogs: new Map(),
+      postFn,
+    })
+
+    const postedText = postFn.mock.calls[0][1] as string
+    expect(postedText).not.toContain(item.link)
+    expect(postedText).toContain('…')
+  })
 })

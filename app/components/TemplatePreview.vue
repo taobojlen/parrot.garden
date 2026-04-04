@@ -97,6 +97,7 @@ const props = defineProps<{
   template: string
   maxCharacters: number
   includeImages?: boolean
+  truncateWithLink?: boolean
   connectionId?: string
   hasUnsavedChanges?: boolean
 }>()
@@ -205,8 +206,11 @@ watch(() => props.sourceId, async (id) => {
 const previewItems = computed(() => {
   if (!feedItems.value.length || !props.template) return []
   return feedItems.value.map((item) => {
-    const rendered = render(props.template, item)
+    let rendered = render(props.template, item)
     const rawGraphemes = countGraphemes(rendered)
+    if (props.truncateWithLink && rawGraphemes > props.maxCharacters) {
+      rendered = rendered + '\n\n' + (item.link ?? '')
+    }
     return {
       rendered: truncate(rendered, props.maxCharacters),
       graphemes: rawGraphemes,

@@ -25,6 +25,9 @@
           <UFormField label="Images" name="includeImages">
             <UCheckbox v-model="form.includeImages" label="Include images" :description="imageDescription" />
           </UFormField>
+          <UFormField label="Truncation" name="truncateWithLink">
+            <UCheckbox v-model="form.truncateWithLink" label="Truncate and add source link if post is too long" :disabled="templateHasLink" />
+          </UFormField>
           <UFormField label="Status" name="enabled">
             <USwitch v-model="form.enabled" label="Active" :description="form.enabled ? 'Connection is active and will cross-post new items' : 'Connection is paused'" />
           </UFormField>
@@ -62,7 +65,7 @@
       />
     </UCard>
 
-    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :max-characters="connection?.maxCharacters ?? 300" :include-images="form.includeImages" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" @image-stats="imageStats = $event" />
+    <TemplatePreview :source-id="connection?.sourceId ?? ''" :template="form.template" :max-characters="connection?.maxCharacters ?? 300" :include-images="form.includeImages" :truncate-with-link="form.truncateWithLink" :connection-id="id" :has-unsaved-changes="hasUnsavedChanges" @image-stats="imageStats = $event" />
   </div>
 </template>
 
@@ -75,7 +78,13 @@ const { data: connection } = await useFetch(`/api/connections/${id}`)
 const form = reactive({
   template: connection.value?.template ?? '{{title}} {{link}}',
   includeImages: connection.value?.includeImages ?? false,
+  truncateWithLink: connection.value?.truncateWithLink ?? false,
   enabled: connection.value?.enabled ?? true,
+})
+const templateHasLink = computed(() => form.template.includes('{{link}}'))
+
+watch(templateHasLink, (hasLink) => {
+  if (hasLink) form.truncateWithLink = false
 })
 
 const imageStats = ref({ total: 0, withImages: 0 })
@@ -113,6 +122,7 @@ const savedForm = ref({ ...form })
 const hasUnsavedChanges = computed(() =>
   form.template !== savedForm.value.template
   || form.includeImages !== savedForm.value.includeImages
+  || form.truncateWithLink !== savedForm.value.truncateWithLink
   || form.enabled !== savedForm.value.enabled,
 )
 

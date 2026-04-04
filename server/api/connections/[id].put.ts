@@ -9,6 +9,7 @@ export default eventHandler(async (event) => {
     .set({
       ...(body.template !== undefined && { template: body.template }),
       ...(body.includeImages !== undefined && { includeImages: body.includeImages }),
+      ...(body.truncateWithLink !== undefined && { truncateWithLink: body.truncateWithLink }),
       ...(body.enabled !== undefined && { enabled: body.enabled }),
       updatedAt: new Date(),
     })

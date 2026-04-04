@@ -24,15 +24,21 @@ export default eventHandler(async (event) => {
   // Render template
   const { maxCharacters, urlCost } = getPostOptions(conn.target)
 
+  let rendered = renderTemplate(conn.connection.template, {
+    title: item.title,
+    link: item.link,
+    description: item.description,
+    content: item.content,
+    author: item.author,
+    date: item.pubDate,
+  })
+
+  if (conn.connection.truncateWithLink && graphemeLength(rendered) > maxCharacters) {
+    rendered = rendered + '\n\n' + item.link
+  }
+
   const text = truncatePost(
-    renderTemplate(conn.connection.template, {
-      title: item.title,
-      link: item.link,
-      description: item.description,
-      content: item.content,
-      author: item.author,
-      date: item.pubDate,
-    }),
+    rendered,
     maxCharacters,
     urlCost !== undefined ? { urlCost } : undefined,
   )

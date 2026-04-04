@@ -29,6 +29,7 @@ export default eventHandler(async (event) => {
     targetId: body.targetId,
     template: body.template || DEFAULT_TEMPLATES[target.type] || '{{title}} {{link}}',
     includeImages: body.includeImages ?? false,
+    truncateWithLink: body.truncateWithLink ?? false,
     enabled: true,
     createdAt: now,
     updatedAt: now,

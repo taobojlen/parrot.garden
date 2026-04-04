@@ -13,6 +13,6 @@ export default eventHandler(async (event) => {
   }).from(schema.targets).where(eq(schema.targets.userId, user.id))
   return rows.map(({ credentials, ...rest }) => ({
     ...rest,
-    maxCharacters: JSON.parse(credentials).maxCharacters as number,
+    maxCharacters: Number(process.env.NUXT_MAX_CHARACTERS_OVERRIDE) || JSON.parse(credentials).maxCharacters as number,
   }))
 })

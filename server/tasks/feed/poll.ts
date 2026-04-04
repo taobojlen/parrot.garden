@@ -92,6 +92,7 @@ export default defineTask({
           connectionId,
           template: conn.connection.template,
           includeImages: conn.connection.includeImages,
+          truncateWithLink: conn.connection.truncateWithLink,
           target: { type: target.type, credentials: target.credentials },
           maxCharacters,
           urlCost,
