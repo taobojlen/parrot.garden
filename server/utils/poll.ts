@@ -13,13 +13,40 @@ export function filterNewItems(
   })
 }
 
-const MAX_RETRY_ATTEMPTS = 5
+const MIN_MS = 60 * 1000
+const BASE_DELAY_MIN = 5
+const MAX_DELAY_MIN = 60
+const ABANDON_AFTER_MS = 24 * 60 * MIN_MS
+
+// Delay before next retry, in minutes. `attempts` is the count including the failure
+// that just occurred: 1 → 5m, 2 → 10m, 3 → 20m, 4 → 40m, 5+ → 60m (capped).
+export function backoffDelayMinutes(attempts: number): number {
+  const exponential = BASE_DELAY_MIN * 2 ** (attempts - 1)
+  return Math.min(exponential, MAX_DELAY_MIN)
+}
+
+export function computeRetrySchedule(opts: {
+  now: Date
+  attempts: number
+  existingFirstFailedAt: Date | null
+  isPermanent: boolean
+}): { firstFailedAt: Date; nextRetryAt: Date | null } {
+  const firstFailedAt = opts.existingFirstFailedAt ?? opts.now
+  const abandoned = opts.isPermanent
+    || (opts.now.getTime() - firstFailedAt.getTime() >= ABANDON_AFTER_MS)
+  const nextRetryAt = abandoned
+    ? null
+    : new Date(opts.now.getTime() + backoffDelayMinutes(opts.attempts) * MIN_MS)
+  return { firstFailedAt, nextRetryAt }
+}
 
 export interface ExistingLog {
   id: string
   itemGuid: string
   status: string
   attempts: number
+  firstFailedAt: Date | null
+  nextRetryAt: Date | null
 }
 
 export interface PostLogRow {
@@ -35,13 +62,22 @@ export interface PostLogRow {
   status: string
   attempts: number
   error: string | null
+  firstFailedAt: Date | null
+  nextRetryAt: Date | null
   postedAt: Date
   updatedAt: Date
 }
 
 export interface PostLogUpdate {
   id: string
-  set: { status: string; error: string | null; attempts?: number; updatedAt: Date }
+  set: {
+    status: string
+    error: string | null
+    attempts?: number
+    firstFailedAt?: Date | null
+    nextRetryAt?: Date | null
+    updatedAt: Date
+  }
 }
 
 export interface ProcessResult {
@@ -81,9 +117,17 @@ export async function processConnectionItems(opts: {
       continue
     }
 
-    if (existing && existing.status === 'failed' && existing.attempts >= MAX_RETRY_ATTEMPTS) {
-      skipped++
-      continue
+    if (existing && existing.status === 'failed') {
+      // Abandoned (permanent or exhausted) — nothing to retry.
+      if (existing.nextRetryAt === null) {
+        skipped++
+        continue
+      }
+      // Not due yet.
+      if (existing.nextRetryAt > now) {
+        skipped++
+        continue
+      }
     }
 
     let rendered = renderTemplate(template, {
@@ -121,6 +165,8 @@ export async function processConnectionItems(opts: {
         status: 'pending',
         attempts: 0,
         error: null,
+        firstFailedAt: null,
+        nextRetryAt: null,
         postedAt: now,
         updatedAt: now,
       }
@@ -139,12 +185,25 @@ export async function processConnectionItems(opts: {
       if (existing) {
         updates.push({
           id: existing.id,
-          set: { status: 'posted', error: null, updatedAt: now },
+          set: {
+            status: 'posted',
+            error: null,
+            firstFailedAt: null,
+            nextRetryAt: null,
+            updatedAt: now,
+          },
         })
       } else if (claimedId) {
         updates.push({
           id: claimedId,
-          set: { status: 'posted', error: null, attempts: 1, updatedAt: now },
+          set: {
+            status: 'posted',
+            error: null,
+            attempts: 1,
+            firstFailedAt: null,
+            nextRetryAt: null,
+            updatedAt: now,
+          },
         })
       } else {
         newRows.push({
@@ -160,6 +219,8 @@ export async function processConnectionItems(opts: {
           status: 'posted',
           attempts: 1,
           error: null,
+          firstFailedAt: null,
+          nextRetryAt: null,
           postedAt: now,
           updatedAt: now,
         })
@@ -168,6 +229,12 @@ export async function processConnectionItems(opts: {
     } catch (e: any) {
       const isPermanent = e.status === 401 || e.status === 400
       const attempts = (existing?.attempts ?? 0) + 1
+      const { firstFailedAt, nextRetryAt } = computeRetrySchedule({
+        now,
+        attempts,
+        existingFirstFailedAt: existing?.firstFailedAt ?? null,
+        isPermanent,
+      })
 
       if (existing) {
         updates.push({
@@ -175,7 +242,9 @@ export async function processConnectionItems(opts: {
           set: {
             status: 'failed',
             error: e.message,
-            attempts: isPermanent ? MAX_RETRY_ATTEMPTS : attempts,
+            attempts,
+            firstFailedAt,
+            nextRetryAt,
             updatedAt: now,
           },
         })
@@ -185,7 +254,9 @@ export async function processConnectionItems(opts: {
           set: {
             status: 'failed',
             error: e.message,
-            attempts: isPermanent ? MAX_RETRY_ATTEMPTS : 1,
+            attempts: 1,
+            firstFailedAt,
+            nextRetryAt,
             updatedAt: now,
           },
         })
@@ -201,8 +272,10 @@ export async function processConnectionItems(opts: {
           itemAuthor: item.author,
           itemPubDate: item.pubDate,
           status: 'failed',
-          attempts: isPermanent ? MAX_RETRY_ATTEMPTS : 1,
+          attempts: 1,
           error: e.message,
+          firstFailedAt,
+          nextRetryAt,
           postedAt: now,
           updatedAt: now,
         })

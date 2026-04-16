@@ -78,6 +78,8 @@ export default defineTask({
           status: schema.postLogs.status,
           attempts: schema.postLogs.attempts,
           id: schema.postLogs.id,
+          firstFailedAt: schema.postLogs.firstFailedAt,
+          nextRetryAt: schema.postLogs.nextRetryAt,
         })
           .from(schema.postLogs)
           .where(eq(schema.postLogs.connectionId, connectionId))
