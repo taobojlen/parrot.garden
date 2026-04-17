@@ -1,4 +1,5 @@
 import { and, eq } from 'drizzle-orm'
+import { computeRetrySchedule } from '../../../utils/poll'
 
 export default eventHandler(async (event) => {
   const user = await requireAuth(event)
@@ -37,6 +38,8 @@ export default eventHandler(async (event) => {
     urlCost !== undefined ? { urlCost } : undefined,
   )
 
+  const now = new Date()
+
   try {
     const credentials = JSON.parse(target.credentials)
     if (target.type === 'bluesky') {
@@ -46,14 +49,34 @@ export default eventHandler(async (event) => {
     }
 
     await db.update(schema.postLogs)
-      .set({ status: 'posted', error: null, updatedAt: new Date() })
+      .set({
+        status: 'posted',
+        error: null,
+        firstFailedAt: null,
+        nextRetryAt: null,
+        updatedAt: now,
+      })
       .where(eq(schema.postLogs.id, id))
 
     return { ok: true, status: 'posted' }
   }
   catch (e: any) {
+    const attempts = postLog.attempts + 1
+    const { firstFailedAt, nextRetryAt } = computeRetrySchedule({
+      now,
+      attempts,
+      existingFirstFailedAt: postLog.firstFailedAt ?? null,
+      isPermanent: e.status === 401 || e.status === 400,
+    })
+
     await db.update(schema.postLogs)
-      .set({ error: e.message, attempts: postLog.attempts + 1, updatedAt: new Date() })
+      .set({
+        error: e.message,
+        attempts,
+        firstFailedAt,
+        nextRetryAt,
+        updatedAt: now,
+      })
       .where(eq(schema.postLogs.id, id))
 
     throw createError({ statusCode: 502, statusMessage: `Post failed: ${e.message}` })

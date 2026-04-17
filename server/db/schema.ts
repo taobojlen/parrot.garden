@@ -102,6 +102,8 @@ export const postLogs = sqliteTable('post_log', {
   status: text('status').notNull(), // 'posted', 'failed', 'skipped'
   attempts: integer('attempts').notNull().default(0),
   error: text('error'),
+  firstFailedAt: integer('first_failed_at', { mode: 'timestamp' }),
+  nextRetryAt: integer('next_retry_at', { mode: 'timestamp' }),
   postedAt: integer('posted_at', { mode: 'timestamp' }),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 }, (table) => [
