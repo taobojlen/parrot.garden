@@ -49,6 +49,12 @@ export default defineNuxtConfig({
         d1_databases: [
           { binding: 'DB', database_id: '7d8c14ce-b905-4974-aced-b700006eff96' },
         ],
+        send_email: [
+          {
+            name: 'EMAIL',
+            allowed_sender_addresses: ['noreply@parrot.garden'],
+          },
+        ],
         observability: {
           logs: {
             enabled: true,
@@ -65,8 +71,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
-    resendApiKey: '',
-    resendFromEmail: '',
     public: {
       posthogPublicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
       posthogHost: 'https://ph.btao.org',
