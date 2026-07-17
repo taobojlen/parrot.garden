@@ -16,7 +16,7 @@ Templates support variables like `{{title}}`, `{{link}}`, `{{description}}`, `{{
 - **Frontend:** Vue 3 + Nuxt 4, Tailwind CSS v4, Nuxt UI
 - **Backend:** Nitro server routes
 - **Database:** Drizzle ORM + SQLite (Cloudflare D1 in production)
-- **Auth:** better-auth with magic link email (via Resend)
+- **Auth:** better-auth with magic link email (via Cloudflare Email Service)
 - **Deployment:** Cloudflare Workers via NuxtHub
 
 ## Development
@@ -42,9 +42,9 @@ Create a `.env` file with:
 ```
 NUXT_BETTER_AUTH_SECRET=
 NUXT_BETTER_AUTH_URL=
-NUXT_RESEND_API_KEY=
-NUXT_RESEND_FROM_EMAIL=
 ```
+
+Production email is sent through the Worker's `EMAIL` binding. The `parrot.garden` domain must be onboarded in Cloudflare Email Service; no email API key is required.
 
 ### Testing
 

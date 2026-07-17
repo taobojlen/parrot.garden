@@ -71,8 +71,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
-    resendApiKey: '',
-    resendFromEmail: '',
     public: {
       posthogPublicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
       posthogHost: 'https://ph.btao.org',
