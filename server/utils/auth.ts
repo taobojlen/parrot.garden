@@ -1,9 +1,7 @@
-import { render } from '@react-email/render'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { magicLink } from 'better-auth/plugins'
-import { Resend } from 'resend'
-import MagicLinkEmail from '../emails/magic-link'
+import { deliverMagicLink, type EmailSender } from './email'
 
 let _auth: any
 
@@ -16,19 +14,15 @@ export function serverAuth() {
       plugins: [
         magicLink({
           sendMagicLink: async ({ email, url }) => {
-            const config = useRuntimeConfig()
-            if (!config.resendApiKey) {
-              // Dev fallback
-              console.log(`[Magic Link] Send to ${email}: ${url}`)
-              return
-            }
-            const resend = new Resend(config.resendApiKey)
-            const html = await render(MagicLinkEmail({ url }))
-            await resend.emails.send({
-              from: config.resendFromEmail || 'parrot.garden <noreply@parrot.garden>',
-              to: email,
-              subject: 'Sign in to parrot.garden',
-              html,
+            const sender = import.meta.dev
+              ? undefined
+              : useEvent().req.runtime.cloudflare.env.EMAIL as EmailSender | undefined
+
+            await deliverMagicLink({
+              email,
+              url,
+              isDevelopment: import.meta.dev,
+              sender,
             })
           },
         }),
