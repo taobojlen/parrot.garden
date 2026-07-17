@@ -104,30 +104,6 @@
   </div>
 </template>
 
-<style scoped>
-.landing-glass {
-  background-color: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border-radius: 0.875rem;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 1.8px 3px 0px -2px rgba(255, 255, 255, 0.15),
-    inset -2px -2px 0px -2px rgba(255, 255, 255, 0.12),
-    inset -3px -8px 1px -6px rgba(255, 255, 255, 0.08),
-    inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.24),
-    inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
-    inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
-    inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
-    0px 1px 5px 0px rgba(0, 0, 0, 0.2),
-    0px 6px 16px 0px rgba(0, 0, 0, 0.16);
-}
-
-.landing-cards :deep(.bg-default) {
-  background-color: rgba(0, 0, 0, 0.35) !important;
-}
-</style>
-
 <script setup lang="ts">
 definePageMeta({
   layout: 'landing',
@@ -165,3 +141,27 @@ useSchemaOrg([
   }),
 ])
 </script>
+
+<style scoped>
+.landing-glass {
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-radius: 0.875rem;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 1.8px 3px 0px -2px rgba(255, 255, 255, 0.15),
+    inset -2px -2px 0px -2px rgba(255, 255, 255, 0.12),
+    inset -3px -8px 1px -6px rgba(255, 255, 255, 0.08),
+    inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.24),
+    inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+    inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+    inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+    0px 1px 5px 0px rgba(0, 0, 0, 0.2),
+    0px 6px 16px 0px rgba(0, 0, 0, 0.16);
+}
+
+.landing-cards :deep(.bg-default) {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+}
+</style>

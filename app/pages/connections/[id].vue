@@ -19,7 +19,7 @@
           <UFormField label="Template" name="template">
             <template #default>
               <UTextarea ref="templateRef" v-model="form.template" :rows="3" class="w-full" />
-              <TemplateVariables @insert="insertVariable" class="mt-2" />
+              <TemplateVariables class="mt-2" @insert="insertVariable" />
             </template>
           </UFormField>
           <UFormField label="Images" name="includeImages">

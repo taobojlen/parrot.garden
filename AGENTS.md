@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents working in this repository.
 
 ## Commands
 
@@ -31,7 +31,7 @@ RSS Source → (feed:poll task every 5min) → parse items → render template �
 - **Frontend:** Vue 3 + Nuxt 4, Tailwind CSS v4, @nuxt/ui
 - **Backend:** Nitro server routes under `server/api/`
 - **Database:** Drizzle ORM + SQLite (Cloudflare D1 in prod, local SQLite in dev)
-- **Auth:** better-auth with magic link (email via Resend)
+- **Auth:** better-auth with magic link (via Cloudflare Email Service)
 - **Deployment:** Cloudflare Workers via @nuxthub/core
 - **Monitoring:** Sentry
 
@@ -55,9 +55,11 @@ RSS Source → (feed:poll task every 5min) → parse items → render template �
 - **Auth guard:** `app/middleware/auth.global.ts` protects all routes except `/` and `/login`.
 - **Glass morphism UI:** Consistent visual theme using backdrop blur, saturation, and layered box shadows defined in `app/assets/css/main.css`.
 
-### Runtime config (env vars)
+### Runtime config
 
-`NUXT_BETTER_AUTH_SECRET`, `NUXT_BETTER_AUTH_URL`, `NUXT_RESEND_API_KEY`, `NUXT_RESEND_FROM_EMAIL`
+Environment variables: `NUXT_BETTER_AUTH_SECRET`, `NUXT_BETTER_AUTH_URL`
+
+Production magic-link email uses the Cloudflare Worker `EMAIL` binding configured in `nuxt.config.ts`.
 
 ## Development practices
 

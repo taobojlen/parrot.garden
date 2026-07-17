@@ -4,7 +4,7 @@
       src="/hero-canopy.png"
       alt=""
       class="og-bg"
-    />
+    >
     <div class="og-container">
       <div class="og-glass">
         <h1 class="og-title">🦜 parrot.garden</h1>
@@ -28,6 +28,13 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+definePageMeta({
+  layout: false,
+  robots: 'noindex, nofollow',
+})
+</script>
 
 <style scoped>
 .og-page {
@@ -103,10 +110,3 @@
   background: rgba(255, 255, 255, 0.25);
 }
 </style>
-
-<script setup lang="ts">
-definePageMeta({
-  layout: false,
-  robots: 'noindex, nofollow',
-})
-</script>

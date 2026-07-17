@@ -7,7 +7,7 @@
       class="fixed inset-0 w-full h-full object-cover -z-20 transition-opacity duration-500"
       :class="bgLoaded ? 'opacity-100' : 'opacity-0'"
       @load="bgLoaded = true"
-    />
+    >
     <div
       class="fixed inset-0 -z-10 bg-onyx opacity-0"
     />

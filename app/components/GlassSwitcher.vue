@@ -1,7 +1,7 @@
 <template>
-  <nav class="switcher" ref="switcherEl">
+  <nav ref="switcherEl" class="switcher">
     <NuxtLink
-      v-for="(item, index) in items"
+      v-for="item in items"
       :key="item.to"
       :to="item.to"
       class="switcher__option"

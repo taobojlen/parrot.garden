@@ -67,7 +67,7 @@ async function retry(id: string) {
   try {
     await $fetch(`/api/post-log/${id}/retry`, { method: 'POST' })
     await refresh()
-  } catch (e) {
+  } catch {
     await refresh()
   } finally {
     retrying.value = ''

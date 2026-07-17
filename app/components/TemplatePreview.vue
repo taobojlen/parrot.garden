@@ -25,7 +25,7 @@
             :alt="img.alt"
             :title="img.alt || undefined"
             class="w-16 h-16 object-cover rounded border border-white/15"
-          />
+          >
         </div>
         <div class="flex items-center justify-between mt-3">
           <p v-if="item.truncated" class="text-xs text-warning">

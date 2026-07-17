@@ -41,6 +41,7 @@
     "@vue/test-utils": "^2.4.6",
     "drizzle-kit": "^0.31.10",
     "happy-dom": "^20.8.4",
+    "typescript": "^5.9.3",
     "unplugin-auto-import": "^21.0.0",
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"

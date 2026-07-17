@@ -5,7 +5,7 @@ import autoImport from 'unplugin-auto-import/vite'
 export default defineConfig({
   plugins: [
     vue(),
-    autoImport({ imports: ['vue'] }),
+    autoImport({ imports: ['vue'], dts: false }),
   ],
   test: {
     include: ['tests/**/*.test.ts'],

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { parseFeed, discoverFeeds, fetchAndParseFeed, type FeedItem, type FeedImage, type DiscoverResult } from '../../server/utils/rss'
+import { parseFeed, discoverFeeds, fetchAndParseFeed } from '../../server/utils/rss'
 
 const RSS_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">

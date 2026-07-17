@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { magicLink } from 'better-auth/plugins'
-import { deliverMagicLink, type EmailSender } from './email'
+import { deliverMagicLink, getCloudflareEmailSender } from './email'
 
 let _auth: any
 
@@ -16,7 +16,7 @@ export function serverAuth() {
           sendMagicLink: async ({ email, url }) => {
             const sender = import.meta.dev
               ? undefined
-              : useEvent().req.runtime.cloudflare.env.EMAIL as EmailSender | undefined
+              : getCloudflareEmailSender(useEvent())
 
             await deliverMagicLink({
               email,

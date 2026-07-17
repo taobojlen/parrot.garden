@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   deliverMagicLink,
   type EmailSender,
+  getCloudflareEmailSender,
   sendMagicLinkEmail,
 } from '../../server/utils/email'
 
@@ -40,6 +41,20 @@ describe('sendMagicLinkEmail', () => {
       'reader@example.com',
       'https://parrot.garden/magic-link',
     )).rejects.toBe(error)
+  })
+})
+
+describe('getCloudflareEmailSender', () => {
+  it('reads the EMAIL binding from Nitro 2 event context', () => {
+    const sender: EmailSender = { send: vi.fn() }
+
+    expect(getCloudflareEmailSender({
+      context: {
+        cloudflare: {
+          env: { EMAIL: sender },
+        },
+      },
+    })).toBe(sender)
   })
 })
 
