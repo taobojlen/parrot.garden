@@ -46,7 +46,7 @@ export default eventHandler(async (event) => {
   // Post to target
   const credentials = JSON.parse(conn.target.credentials)
   if (conn.target.type === 'bluesky') {
-    await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined)
+    await postToBluesky(credentials, text, conn.connection.includeImages ? item.images : undefined, item.link)
   } else if (conn.target.type === 'mastodon') {
     await postToMastodon(credentials, text, conn.connection.includeImages ? item.images : undefined)
   }

@@ -43,7 +43,7 @@ export default eventHandler(async (event) => {
   try {
     const credentials = JSON.parse(target.credentials)
     if (target.type === 'bluesky') {
-      await postToBluesky(credentials, text)
+      await postToBluesky(credentials, text, undefined, postLog.itemLink ?? undefined)
     } else if (target.type === 'mastodon') {
       await postToMastodon(credentials, text)
     }
