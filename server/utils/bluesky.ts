@@ -1,4 +1,5 @@
 import { AtpAgent, RichText } from '@atproto/api'
+import { parse as parseHtml } from 'node-html-parser'
 import type { FeedImage } from './rss'
 
 interface BlueskyCredentials {
@@ -70,6 +71,42 @@ async function downloadAndUploadImage(
   }
 }
 
+async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | undefined> {
+  try {
+    const protocol = new URL(url).protocol
+    if (protocol !== 'http:' && protocol !== 'https:') return undefined
+
+    const response = await fetch(url)
+    if (!response.ok) return undefined
+
+    const doc = parseHtml(await response.text())
+    const title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
+      ?? doc.querySelector('title')?.text.trim()
+      ?? ''
+    const description = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
+      ?? doc.querySelector('meta[name="description"]')?.getAttribute('content')
+      ?? ''
+    const imageUrl = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')
+    const external: Record<string, unknown> = { uri: url, title, description }
+
+    if (imageUrl) {
+      const uploaded = await downloadAndUploadImage(agent, {
+        url: new URL(imageUrl, url).toString(),
+        alt: '',
+      })
+      if (uploaded) external.thumb = uploaded.image
+    }
+
+    return {
+      $type: 'app.bsky.embed.external',
+      external,
+    }
+  }
+  catch {
+    return undefined
+  }
+}
+
 export async function verifyBlueskyCredentials(
   credentials: BlueskyCredentials,
 ): Promise<void> {
@@ -90,6 +127,7 @@ export async function postToBluesky(
   credentials: BlueskyCredentials,
   text: string,
   images?: FeedImage[],
+  externalUrl?: string,
 ): Promise<{ uri: string; cid: string }> {
   const service = await resolvePdsUrl(credentials.handle)
   const agent = new AtpAgent({ service })
@@ -113,6 +151,9 @@ export async function postToBluesky(
         images: successful,
       }
     }
+  }
+  if (!embed && externalUrl) {
+    embed = await createExternalEmbed(agent, externalUrl)
   }
 
   const response = await agent.post({
