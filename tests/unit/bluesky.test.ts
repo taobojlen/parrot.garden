@@ -185,6 +185,90 @@ describe('postToBluesky', () => {
     })
   })
 
+  it('resolves a relative card image against the final URL after redirects', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/article') {
+        return Promise.resolve({
+          ok: true,
+          url: 'https://example.com/posts/article/',
+          text: () => Promise.resolve('<meta property="og:image" content="thumb.jpg">'),
+        })
+      }
+      if (url === 'https://example.com/posts/article/thumb.jpg') {
+        return Promise.resolve({
+          ok: true,
+          headers: new Headers({ 'content-type': 'image/jpeg' }),
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(credentials, 'Redirected article', undefined, 'https://example.com/article')
+
+    expect(mockFetch).toHaveBeenCalledWith('https://example.com/posts/article/thumb.jpg')
+    expect(mockPost.mock.calls[0][0].embed.external.thumb).toEqual(
+      { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 },
+    )
+  })
+
+  it('keeps the external card when its image URL is malformed', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/posts/broken-image') {
+        return Promise.resolve({
+          ok: true,
+          url,
+          text: () => Promise.resolve(`
+            <meta property="og:title" content="Valid card">
+            <meta property="og:description" content="Still useful">
+            <meta property="og:image" content="http://%">
+          `),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(
+      credentials,
+      'Malformed card image',
+      undefined,
+      'https://example.com/posts/broken-image',
+    )
+
+    expect(mockPost.mock.calls[0][0].embed).toEqual({
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: 'https://example.com/posts/broken-image',
+        title: 'Valid card',
+        description: 'Still useful',
+      },
+    })
+  })
+
   it('falls back to standard HTML metadata when Open Graph tags are absent', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url.includes('com.atproto.identity.resolveHandle')) {

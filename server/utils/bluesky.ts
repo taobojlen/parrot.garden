@@ -90,11 +90,16 @@ async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | 
     const external: Record<string, unknown> = { uri: url, title, description }
 
     if (imageUrl) {
-      const uploaded = await downloadAndUploadImage(agent, {
-        url: new URL(imageUrl, url).toString(),
-        alt: '',
-      })
-      if (uploaded) external.thumb = uploaded.image
+      try {
+        const uploaded = await downloadAndUploadImage(agent, {
+          url: new URL(imageUrl, response.url || url).toString(),
+          alt: '',
+        })
+        if (uploaded) external.thumb = uploaded.image
+      }
+      catch {
+        // A bad optional thumbnail should not prevent the link card.
+      }
     }
 
     return {
