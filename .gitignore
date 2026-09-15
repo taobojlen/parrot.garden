@@ -35,3 +35,6 @@ logs
 
 # Skilld references (recreated by `skilld install`)
 .skilld
+
+# Amp runtime state
+.amp/portals/*
