@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+mise_bin="$HOME/.local/bin/mise"
+
+run_step() {
+  local name="$1"
+  shift
+  local started=$SECONDS
+  printf '\n==> %s\n' "$name"
+  "$@"
+  printf '<== %s (%ss)\n' "$name" "$((SECONDS - started))"
+}
+
+cd "$repo_root"
+
+if [[ ! -x "$mise_bin" ]]; then
+  run_step "Install mise" bash -c 'curl https://mise.run | sh'
+fi
+
+profile_marker="# parrot.garden mise activation"
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+  cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_marker
+case "\$PWD" in
+  "$repo_root"|"$repo_root"/*)
+    eval "\$("$mise_bin" activate bash)"
+    ;;
+esac
+EOF
+fi
+
+run_step "Trust toolchain configuration" "$mise_bin" trust "$repo_root/mise.toml"
+run_step "Install pinned toolchain" "$mise_bin" install
+run_step "Enable Corepack" "$mise_bin" exec -- corepack enable
+run_step "Install dependencies" "$mise_bin" exec -- pnpm install --frozen-lockfile
+
+printf '\nOrb setup complete.\n'
