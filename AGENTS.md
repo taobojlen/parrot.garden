@@ -65,6 +65,11 @@ Production magic-link email uses the Cloudflare Worker `EMAIL` binding configure
 
 - Use red/green TDD where it makes sense. Integration and e2e tests are often more useful than unit tests.
 - **Never test configuration by asserting its declared values.** Test observable behavior instead. Importing a config and checking for a flag does not verify that the flag fixes the behavior.
+- Prefer integration tests for application workflows. Exercise real modules together, including database queries and migrations where practical.
+- Mock external boundaries, such as HTTP services and email delivery. Do not mock internal helpers or SDKs when they can run locally.
+- Assert observable outcomes: rendered content, outbound request payloads, persisted state, and errors. Avoid assertions about internal call order, file layout, or fixed constants unless those are part of the contract.
+- Keep focused unit tests for complex algorithms and meaningful edge cases. Do not duplicate behavior already covered by integration tests.
+- Choose tests for the confidence they provide, not to reach a coverage percentage or test count.
 
 <!-- skilld -->
 Before modifying code, evaluate each installed skill against the current task.

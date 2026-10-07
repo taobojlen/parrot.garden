@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
-import { defineComponent, h, ref } from 'vue'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { mount, flushPromises, enableAutoUnmount } from '@vue/test-utils'
+import { defineComponent, h } from 'vue'
 import TemplatePreview from '../../app/components/TemplatePreview.vue'
+
+enableAutoUnmount(afterEach)
 
 // Stub Nuxt's auto-imported $fetch
 const fetchMock = vi.fn()
@@ -52,10 +54,6 @@ const UIcon = defineComponent({
 
 const stubs = { UCard, UModal, UButton, UAlert, UIcon }
 
-// Stub Nuxt auto-imports
-vi.stubGlobal('$fetch', fetchMock)
-vi.stubGlobal('ref', ref)
-
 const feedItems = [
   { title: 'Post One', link: 'https://example.com/1', description: 'Desc 1', content: '', author: 'Alice', pubDate: '2024-01-01' },
   { title: 'Post Two', link: 'https://example.com/2', description: 'Desc 2', content: '', author: 'Bob', pubDate: '2024-01-02' },
@@ -63,6 +61,7 @@ const feedItems = [
 
 describe('TemplatePreview post confirmation', () => {
   beforeEach(() => {
+    vi.stubGlobal('$fetch', fetchMock)
     fetchMock.mockReset()
     fetchMock.mockImplementation((url: string) => {
       if (url.includes('/items')) return Promise.resolve(feedItems)
@@ -70,71 +69,37 @@ describe('TemplatePreview post confirmation', () => {
     })
   })
 
-  it('does not post immediately when Post button is clicked', async () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('previews the selected item, posts only after confirmation, and shows success', async () => {
     const wrapper = mount(TemplatePreview, {
       props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
       global: { stubs },
     })
     await flushPromises()
 
-    // Find the first "Post" button (skip non-post buttons)
-    const buttons = wrapper.findAll('button')
-    const postButton = buttons.find(b => b.text().includes('Post'))
-    expect(postButton).toBeTruthy()
-
-    await postButton!.trigger('click')
+    const postButtons = wrapper.findAll('button').filter(b => b.text() === 'Post')
+    await postButtons[1]!.trigger('click')
     await flushPromises()
 
-    // Should NOT have called the post-item endpoint
-    const postCalls = fetchMock.mock.calls.filter(
-      (call: any[]) => typeof call[0] === 'string' && call[0].includes('post-item'),
-    )
-    expect(postCalls).toHaveLength(0)
-  })
-
-  it('opens confirmation modal with post content on click', async () => {
-    const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
-      global: { stubs },
-    })
-    await flushPromises()
-
-    const postButton = wrapper.findAll('button').find(b => b.text().includes('Post'))
-    await postButton!.trigger('click')
-    await flushPromises()
-
-    // Modal should now be visible
     const modal = wrapper.find('.u-modal')
-    expect(modal.exists()).toBe(true)
     expect(modal.text()).toContain('Confirm post')
-    expect(modal.text()).toContain('Post One')
-  })
-
-  it('posts only after confirming in the modal', async () => {
-    const wrapper = mount(TemplatePreview, {
-      props: { sourceId: 'src-1', template: '{{title}} {{link}}', connectionId: 'conn-1', maxCharacters: 300 },
-      global: { stubs },
-    })
-    await flushPromises()
-
-    // Click "Post" to open modal
-    const postButton = wrapper.findAll('button').find(b => b.text().includes('Post'))
-    await postButton!.trigger('click')
-    await flushPromises()
-
-    // Click "Post" inside the modal to confirm
-    const modal = wrapper.find('.u-modal')
-    const confirmButton = modal.findAll('button').find(b => b.text().includes('Post'))
-    expect(confirmButton).toBeTruthy()
+    expect(modal.text()).toContain('Post Two https://example.com/2')
+    expect(modal.text()).not.toContain('Post One')
+    expect(fetchMock.mock.calls).toEqual([['/api/sources/src-1/items']])
+    const confirmButton = modal.findAll('button').find(b => b.text() === 'Post')
     await confirmButton!.trigger('click')
     await flushPromises()
 
-    // Now the post-item endpoint should have been called
-    const postCalls = fetchMock.mock.calls.filter(
-      (call: any[]) => typeof call[0] === 'string' && call[0].includes('post-item'),
-    )
-    expect(postCalls).toHaveLength(1)
-    expect(postCalls[0][0]).toContain('/api/connections/conn-1/post-item')
+    expect(fetchMock.mock.calls).toEqual([
+      ['/api/sources/src-1/items'],
+      ['/api/connections/conn-1/post-item', { method: 'POST', body: { itemIndex: 1 } }],
+    ])
+    expect(wrapper.find('.u-modal').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Posted successfully')
+    const postedButton = wrapper.findAll('button').find(b => b.text() === 'Posted')!
+    expect((postedButton.element as HTMLButtonElement).disabled).toBe(true)
+    expect((postButtons[0]!.element as HTMLButtonElement).disabled).toBe(false)
   })
 
   it('does not post when Cancel is clicked in the modal', async () => {
@@ -156,10 +121,7 @@ describe('TemplatePreview post confirmation', () => {
     await cancelButton!.trigger('click')
     await flushPromises()
 
-    // Should NOT have called the post-item endpoint
-    const postCalls = fetchMock.mock.calls.filter(
-      (call: any[]) => typeof call[0] === 'string' && call[0].includes('post-item'),
-    )
-    expect(postCalls).toHaveLength(0)
+    expect(wrapper.find('.u-modal').exists()).toBe(false)
+    expect(fetchMock.mock.calls).toEqual([['/api/sources/src-1/items']])
   })
 })
