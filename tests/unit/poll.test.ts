@@ -142,6 +142,7 @@ describe('processConnectionItems', () => {
       {},
       expect.any(String),
       item.images,
+      item.link,
     )
   })
 
@@ -162,6 +163,26 @@ describe('processConnectionItems', () => {
       {},
       expect.any(String),
       undefined,
+      item.link,
+    )
+  })
+
+  it('passes the canonical item link to the target for an external card', async () => {
+    const item = makeFeedItem('canonical')
+    const postFn = vi.fn()
+
+    await processConnectionItems({
+      ...baseArgs,
+      items: [item],
+      existingLogs: new Map(),
+      postFn,
+    })
+
+    expect(postFn).toHaveBeenCalledWith(
+      {},
+      expect.any(String),
+      undefined,
+      'https://example.com/canonical',
     )
   })
 

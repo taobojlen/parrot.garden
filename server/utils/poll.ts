@@ -98,7 +98,7 @@ export async function processConnectionItems(opts: {
   target: { type: string; credentials: string }
   maxCharacters: number
   urlCost?: number
-  postFn: (credentials: any, text: string, images?: FeedImage[]) => Promise<void>
+  postFn: (credentials: any, text: string, images: FeedImage[] | undefined, externalUrl: string) => Promise<void>
   claimFn?: (row: PostLogRow) => Promise<boolean>
 }): Promise<ProcessResult> {
   const { items, existingLogs, connectionId, template, includeImages, target, postFn, claimFn } = opts
@@ -180,7 +180,7 @@ export async function processConnectionItems(opts: {
 
     try {
       const credentials = JSON.parse(target.credentials)
-      await postFn(credentials, text, includeImages ? item.images : undefined)
+      await postFn(credentials, text, includeImages ? item.images : undefined, item.link)
 
       if (existing) {
         updates.push({

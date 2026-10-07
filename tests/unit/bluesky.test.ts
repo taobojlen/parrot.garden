@@ -130,6 +130,201 @@ describe('postToBluesky', () => {
     expect(postArg.embed).toBeUndefined()
   })
 
+  it('creates an external card from the canonical link when no image is attached', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/posts/one') {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(`
+            <html><head>
+              <meta property="og:title" content="The canonical title">
+              <meta property="og:description" content="A useful summary">
+              <meta property="og:image" content="/images/card.jpg">
+            </head></html>
+          `),
+        })
+      }
+      if (url === 'https://example.com/images/card.jpg') {
+        return Promise.resolve({
+          ok: true,
+          headers: new Headers({ 'content-type': 'image/jpeg' }),
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(
+      credentials,
+      'Read this https://example.com/posts/one',
+      undefined,
+      'https://example.com/posts/one',
+    )
+
+    const postArg = mockPost.mock.calls[0][0]
+    expect(postArg.embed).toEqual({
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: 'https://example.com/posts/one',
+        title: 'The canonical title',
+        description: 'A useful summary',
+        thumb: { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 },
+      },
+    })
+  })
+
+  it('resolves a relative card image against the final URL after redirects', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/article') {
+        return Promise.resolve({
+          ok: true,
+          url: 'https://example.com/posts/article/',
+          text: () => Promise.resolve('<meta property="og:image" content="thumb.jpg">'),
+        })
+      }
+      if (url === 'https://example.com/posts/article/thumb.jpg') {
+        return Promise.resolve({
+          ok: true,
+          headers: new Headers({ 'content-type': 'image/jpeg' }),
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(credentials, 'Redirected article', undefined, 'https://example.com/article')
+
+    expect(mockFetch).toHaveBeenCalledWith('https://example.com/posts/article/thumb.jpg')
+    expect(mockPost.mock.calls[0][0].embed.external.thumb).toEqual(
+      { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 },
+    )
+  })
+
+  it('keeps the external card when its image URL is malformed', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/posts/broken-image') {
+        return Promise.resolve({
+          ok: true,
+          url,
+          text: () => Promise.resolve(`
+            <meta property="og:title" content="Valid card">
+            <meta property="og:description" content="Still useful">
+            <meta property="og:image" content="http://%">
+          `),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(
+      credentials,
+      'Malformed card image',
+      undefined,
+      'https://example.com/posts/broken-image',
+    )
+
+    expect(mockPost.mock.calls[0][0].embed).toEqual({
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: 'https://example.com/posts/broken-image',
+        title: 'Valid card',
+        description: 'Still useful',
+      },
+    })
+  })
+
+  it('falls back to standard HTML metadata when Open Graph tags are absent', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/posts/plain') {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(`
+            <html><head>
+              <title>A plain HTML title</title>
+              <meta name="description" content="A standard description">
+            </head></html>
+          `),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    await postToBluesky(
+      credentials,
+      'Read this',
+      undefined,
+      'https://example.com/posts/plain',
+    )
+
+    const postArg = mockPost.mock.calls[0][0]
+    expect(postArg.embed.external).toEqual({
+      uri: 'https://example.com/posts/plain',
+      title: 'A plain HTML title',
+      description: 'A standard description',
+    })
+  })
+
+  it('does not fetch a non-HTTP canonical link', async () => {
+    await postToBluesky(
+      credentials,
+      'Invalid link',
+      undefined,
+      'file:///etc/passwd',
+    )
+
+    expect(mockFetch).not.toHaveBeenCalledWith('file:///etc/passwd')
+    const postArg = mockPost.mock.calls[0][0]
+    expect(postArg.embed).toBeUndefined()
+  })
+
   it('uploads images and attaches them as embed', async () => {
     const images: FeedImage[] = [
       { url: 'https://example.com/photo.jpg', alt: 'A nice photo' },
@@ -156,6 +351,23 @@ describe('postToBluesky', () => {
         },
       ],
     })
+  })
+
+  it('prefers an attached feed image over an external card', async () => {
+    const images: FeedImage[] = [
+      { url: 'https://example.com/photo.jpg', alt: 'A nice photo' },
+    ]
+
+    await postToBluesky(
+      credentials,
+      'Check this out',
+      images,
+      'https://example.com/posts/one',
+    )
+
+    const postArg = mockPost.mock.calls[0][0]
+    expect(postArg.embed.$type).toBe('app.bsky.embed.images')
+    expect(mockFetch).not.toHaveBeenCalledWith('https://example.com/posts/one')
   })
 
   it('uploads multiple images', async () => {
@@ -211,7 +423,7 @@ describe('postToBluesky', () => {
     expect(postArg.embed.images[0].alt).toBe('Found')
   })
 
-  it('posts without embed if all images fail to download', async () => {
+  it('posts without embed when images and canonical page fail to download', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url.includes('com.atproto.identity.resolveHandle')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
@@ -231,10 +443,52 @@ describe('postToBluesky', () => {
     const images: FeedImage[] = [
       { url: 'https://example.com/broken.jpg', alt: 'Broken' },
     ]
-    await postToBluesky(credentials, 'No images work', images)
+    await postToBluesky(credentials, 'No images work', images, 'https://example.com/post')
 
     const postArg = mockPost.mock.calls[0][0]
     expect(postArg.embed).toBeUndefined()
+  })
+
+  it('falls back to the external card when all feed images fail to download', async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes('com.atproto.identity.resolveHandle')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
+      }
+      if (url.includes('plc.directory')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            id: 'did:plc:testuser123',
+            service: [{ id: '#atproto_pds', type: 'AtprotoPersonalDataServer', serviceEndpoint: 'https://bsky.social' }],
+          }),
+        })
+      }
+      if (url === 'https://example.com/broken.jpg') {
+        return Promise.resolve({ ok: false, status: 404 })
+      }
+      if (url === 'https://example.com/post') {
+        return Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve('<meta property="og:title" content="Fallback card">'),
+        })
+      }
+      return Promise.resolve({ ok: false })
+    })
+
+    const images: FeedImage[] = [
+      { url: 'https://example.com/broken.jpg', alt: 'Broken' },
+    ]
+    await postToBluesky(credentials, 'Fallback', images, 'https://example.com/post')
+
+    const postArg = mockPost.mock.calls[0][0]
+    expect(postArg.embed).toEqual({
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: 'https://example.com/post',
+        title: 'Fallback card',
+        description: '',
+      },
+    })
   })
 
   it('uses empty alt text when image has no alt', async () => {
