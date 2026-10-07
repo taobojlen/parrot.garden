@@ -98,9 +98,9 @@ export default defineTask({
           target: { type: target.type, credentials: target.credentials },
           maxCharacters,
           urlCost,
-          postFn: async (credentials, text, images, externalUrl) => {
+          postFn: async (credentials, text, images) => {
             if (target.type === 'bluesky') {
-              await postToBluesky(credentials, text, images, externalUrl)
+              await postToBluesky(credentials, text, images)
             } else if (target.type === 'mastodon') {
               await postToMastodon(credentials, text, images)
             }

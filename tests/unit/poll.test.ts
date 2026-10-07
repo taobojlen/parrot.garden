@@ -142,7 +142,6 @@ describe('processConnectionItems', () => {
       {},
       expect.any(String),
       item.images,
-      item.link,
     )
   })
 
@@ -163,16 +162,16 @@ describe('processConnectionItems', () => {
       {},
       expect.any(String),
       undefined,
-      item.link,
     )
   })
 
-  it('passes the canonical item link to the target for an external card', async () => {
+  it('does not pass the feed permalink separately to the target', async () => {
     const item = makeFeedItem('canonical')
     const postFn = vi.fn()
 
     await processConnectionItems({
       ...baseArgs,
+      template: '{{title}}',
       items: [item],
       existingLogs: new Map(),
       postFn,
@@ -180,9 +179,8 @@ describe('processConnectionItems', () => {
 
     expect(postFn).toHaveBeenCalledWith(
       {},
-      expect.any(String),
+      item.title,
       undefined,
-      'https://example.com/canonical',
     )
   })
 

@@ -8,11 +8,11 @@ const mockUploadBlob = vi.fn().mockResolvedValue({
   data: { blob: { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 } },
 })
 const mockLogin = vi.fn().mockResolvedValue({})
-const mockDetectFacets = vi.fn().mockResolvedValue(undefined)
 
 const mockAtpAgentConstructor = vi.fn()
 
-vi.mock('@atproto/api', () => {
+vi.mock('@atproto/api', async (importOriginal) => {
+  const { RichText } = await importOriginal<typeof import('@atproto/api')>()
   return {
     AtpAgent: class {
       constructor(opts: { service: string }) {
@@ -23,15 +23,7 @@ vi.mock('@atproto/api', () => {
       post = mockPost
       uploadBlob = mockUploadBlob
     },
-    RichText: class {
-      text: string
-      facets: undefined
-      constructor({ text }: { text: string }) {
-        this.text = text
-      }
-
-      detectFacets = mockDetectFacets
-    },
+    RichText,
   }
 })
 
@@ -130,7 +122,40 @@ describe('postToBluesky', () => {
     expect(postArg.embed).toBeUndefined()
   })
 
-  it('creates an external card from the canonical link when no image is attached', async () => {
+  it('does not fetch a card when the post text has no link', async () => {
+    await postToBluesky(credentials, 'Just a thought.')
+
+    expect(mockPost.mock.calls[0][0].embed).toBeUndefined()
+    expect(mockFetch).toHaveBeenCalledTimes(2) // Handle resolution and DID document only
+  })
+
+  it.each([
+    'Most people read code very badly.\n\nhttps://seangoedecke.com/how-to-read-code/',
+    'Read https://seangoedecke.com/how-to-read-code/ then https://example.com/second',
+    'Read (https://seangoedecke.com/how-to-read-code/).',
+  ])('embeds the first detected post link: %s', async (text) => {
+    const defaultFetch = mockFetch.getMockImplementation()!
+    mockFetch.mockImplementation((url: string) => {
+      if (url === 'https://seangoedecke.com/how-to-read-code/') {
+        return Promise.resolve(new Response('<title>How to read code</title>'))
+      }
+      return defaultFetch(url)
+    })
+
+    await postToBluesky(credentials, text)
+
+    expect(mockPost.mock.calls[0][0].embed).toEqual({
+      $type: 'app.bsky.embed.external',
+      external: {
+        uri: 'https://seangoedecke.com/how-to-read-code/',
+        title: 'How to read code',
+        description: '',
+      },
+    })
+    expect(mockFetch).not.toHaveBeenCalledWith('https://example.com/second')
+  })
+
+  it('creates an external card from the post link when no image is attached', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url.includes('com.atproto.identity.resolveHandle')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
@@ -169,8 +194,6 @@ describe('postToBluesky', () => {
     await postToBluesky(
       credentials,
       'Read this https://example.com/posts/one',
-      undefined,
-      'https://example.com/posts/one',
     )
 
     const postArg = mockPost.mock.calls[0][0]
@@ -216,7 +239,7 @@ describe('postToBluesky', () => {
       return Promise.resolve({ ok: false })
     })
 
-    await postToBluesky(credentials, 'Redirected article', undefined, 'https://example.com/article')
+    await postToBluesky(credentials, 'Redirected article https://example.com/article')
 
     expect(mockFetch).toHaveBeenCalledWith('https://example.com/posts/article/thumb.jpg')
     expect(mockPost.mock.calls[0][0].embed.external.thumb).toEqual(
@@ -254,9 +277,7 @@ describe('postToBluesky', () => {
 
     await postToBluesky(
       credentials,
-      'Malformed card image',
-      undefined,
-      'https://example.com/posts/broken-image',
+      'Malformed card image https://example.com/posts/broken-image',
     )
 
     expect(mockPost.mock.calls[0][0].embed).toEqual({
@@ -299,9 +320,7 @@ describe('postToBluesky', () => {
 
     await postToBluesky(
       credentials,
-      'Read this',
-      undefined,
-      'https://example.com/posts/plain',
+      'Read this https://example.com/posts/plain',
     )
 
     const postArg = mockPost.mock.calls[0][0]
@@ -312,12 +331,10 @@ describe('postToBluesky', () => {
     })
   })
 
-  it('does not fetch a non-HTTP canonical link', async () => {
+  it('does not fetch a non-HTTP link in the post', async () => {
     await postToBluesky(
       credentials,
-      'Invalid link',
-      undefined,
-      'file:///etc/passwd',
+      'Invalid link file:///etc/passwd',
     )
 
     expect(mockFetch).not.toHaveBeenCalledWith('file:///etc/passwd')
@@ -360,9 +377,8 @@ describe('postToBluesky', () => {
 
     await postToBluesky(
       credentials,
-      'Check this out',
+      'Check this out https://example.com/posts/one',
       images,
-      'https://example.com/posts/one',
     )
 
     const postArg = mockPost.mock.calls[0][0]
@@ -423,7 +439,7 @@ describe('postToBluesky', () => {
     expect(postArg.embed.images[0].alt).toBe('Found')
   })
 
-  it('posts without embed when images and canonical page fail to download', async () => {
+  it('posts without embed when images and linked page fail to download', async () => {
     mockFetch.mockImplementation((url: string) => {
       if (url.includes('com.atproto.identity.resolveHandle')) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({ did: 'did:plc:testuser123' }) })
@@ -443,7 +459,7 @@ describe('postToBluesky', () => {
     const images: FeedImage[] = [
       { url: 'https://example.com/broken.jpg', alt: 'Broken' },
     ]
-    await postToBluesky(credentials, 'No images work', images, 'https://example.com/post')
+    await postToBluesky(credentials, 'No images work https://example.com/post', images)
 
     const postArg = mockPost.mock.calls[0][0]
     expect(postArg.embed).toBeUndefined()
@@ -478,7 +494,7 @@ describe('postToBluesky', () => {
     const images: FeedImage[] = [
       { url: 'https://example.com/broken.jpg', alt: 'Broken' },
     ]
-    await postToBluesky(credentials, 'Fallback', images, 'https://example.com/post')
+    await postToBluesky(credentials, 'Fallback https://example.com/post', images)
 
     const postArg = mockPost.mock.calls[0][0]
     expect(postArg.embed).toEqual({

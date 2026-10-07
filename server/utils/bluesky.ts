@@ -132,7 +132,6 @@ export async function postToBluesky(
   credentials: BlueskyCredentials,
   text: string,
   images?: FeedImage[],
-  externalUrl?: string,
 ): Promise<{ uri: string; cid: string }> {
   const service = await resolvePdsUrl(credentials.handle)
   const agent = new AtpAgent({ service })
@@ -157,8 +156,9 @@ export async function postToBluesky(
       }
     }
   }
-  if (!embed && externalUrl) {
-    embed = await createExternalEmbed(agent, externalUrl)
+  if (!embed) {
+    const postLink = Array.from(rt.segments()).find(segment => segment.isLink())?.link?.uri
+    if (postLink) embed = await createExternalEmbed(agent, postLink)
   }
 
   const response = await agent.post({
