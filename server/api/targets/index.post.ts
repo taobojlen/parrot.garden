@@ -1,3 +1,5 @@
+import { checkResourceLimit, insertLimitedResource } from '../../utils/resource-limits'
+
 const CREDENTIAL_SHAPES: Record<string, string[]> = {
   bluesky: ['handle', 'appPassword'],
   mastodon: [],
@@ -5,6 +7,7 @@ const CREDENTIAL_SHAPES: Record<string, string[]> = {
 
 export default eventHandler(async (event) => {
   const user = await requireAuth(event)
+  await checkResourceLimit(schema.targets, user.id)
   const body = await readBody(event)
 
   if (!body.name || !body.type || !body.credentials) {
@@ -56,6 +59,6 @@ export default eventHandler(async (event) => {
     updatedAt: now,
   }
 
-  await db.insert(schema.targets).values(target)
+  await insertLimitedResource(schema.targets, target)
   return { ...target, credentials: undefined }
 })

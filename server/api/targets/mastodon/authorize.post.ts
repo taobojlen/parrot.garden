@@ -1,7 +1,9 @@
 import { eq } from 'drizzle-orm'
+import { checkResourceLimit } from '../../../utils/resource-limits'
 
 export default eventHandler(async (event) => {
   const user = await requireAuth(event)
+  await checkResourceLimit(schema.targets, user.id)
   const body = await readBody<{ instanceUrl: string; targetName: string }>(event)
 
   if (!body.instanceUrl || !body.targetName) {

@@ -1,7 +1,9 @@
 import { and, eq, lt } from 'drizzle-orm'
+import { checkResourceLimit, insertLimitedResource } from '../../../utils/resource-limits'
 
 export default eventHandler(async (event) => {
   const user = await requireAuth(event)
+  await checkResourceLimit(schema.targets, user.id)
   const query = getQuery(event)
   const code = query.code as string
   const stateParam = query.state as string
@@ -89,7 +91,7 @@ export default eventHandler(async (event) => {
     updatedAt: now,
   }
 
-  await db.insert(schema.targets).values(target)
+  await insertLimitedResource(schema.targets, target)
 
   // Redirect to the new target's page
   return sendRedirect(event, `/targets/${target.id}`)

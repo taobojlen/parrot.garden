@@ -1,7 +1,9 @@
 import { chunk, SOURCE_ITEM_BATCH_SIZE } from '../../utils/batch'
+import { checkResourceLimit, insertLimitedResource } from '../../utils/resource-limits'
 
 export default eventHandler(async (event) => {
   const user = await requireAuth(event)
+  await checkResourceLimit(schema.sources, user.id)
   const body = await readBody(event)
 
   if (!body.name || !body.url) {
@@ -26,7 +28,7 @@ export default eventHandler(async (event) => {
     updatedAt: now,
   }
 
-  await db.insert(schema.sources).values(source)
+  await insertLimitedResource(schema.sources, source)
 
   // Record existing feed items so connections created later won't post them
   for (const batch of chunk(items, SOURCE_ITEM_BATCH_SIZE)) {
