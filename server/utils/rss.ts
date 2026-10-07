@@ -177,15 +177,81 @@ export function parseFeed(xml: string): FeedItem[] {
 
 const RSS_USER_AGENT = 'parrot.garden/1.0 (POSSE syndication; +https://parrot.garden)'
 
-export async function fetchAndParseFeed(url: string): Promise<FeedItem[]> {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': RSS_USER_AGENT },
-  })
-  if (!response.ok) {
-    throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`)
+const FEED_TIMEOUT_MS = 15_000
+const MAX_FEED_BYTES = 2 * 1024 * 1024
+
+export class FeedFetchError extends Error {
+  constructor(public status: number, public retryAfter: string | null, statusText: string) {
+    super(`Failed to fetch feed: ${status} ${statusText}`)
   }
-  const xml = await response.text()
-  return parseFeed(xml)
+}
+
+export async function fetchFeed(url: string, validators: { etag?: string | null; lastModified?: string | null } = {}): Promise<{
+  items: FeedItem[] | null
+  etag: string | null
+  lastModified: string | null
+}> {
+  const controller = new AbortController()
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+  let timer: ReturnType<typeof setTimeout>
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('Feed fetch timed out'))
+      controller.abort()
+    }, FEED_TIMEOUT_MS)
+  })
+  const request = async () => {
+    const headers: Record<string, string> = { 'User-Agent': RSS_USER_AGENT }
+    if (validators.etag) headers['If-None-Match'] = validators.etag
+    if (validators.lastModified) headers['If-Modified-Since'] = validators.lastModified
+    const response = await fetch(url, { headers, signal: controller.signal })
+    reader = response.body?.getReader()
+    if (response.status === 304) {
+      return {
+        items: null,
+        etag: response.headers.get('etag') ?? validators.etag ?? null,
+        lastModified: response.headers.get('last-modified') ?? validators.lastModified ?? null,
+      }
+    }
+    if (!response.ok) {
+      throw new FeedFetchError(response.status, response.headers.get('retry-after'), response.statusText)
+    }
+    if (Number(response.headers.get('content-length')) > MAX_FEED_BYTES) {
+      throw new Error('Feed response exceeds size limit')
+    }
+    const decoder = new TextDecoder()
+    let size = 0
+    let xml = ''
+    if (reader) {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        size += value.byteLength
+        if (size > MAX_FEED_BYTES) throw new Error('Feed response exceeds size limit')
+        xml += decoder.decode(value, { stream: true })
+      }
+    }
+    xml += decoder.decode()
+    return {
+      items: parseFeed(xml),
+      etag: response.headers.get('etag'),
+      lastModified: response.headers.get('last-modified'),
+    }
+  }
+  try {
+    return await Promise.race([request(), deadline])
+  }
+  finally {
+    clearTimeout(timer!)
+    controller.abort()
+    void reader?.cancel().catch(() => {})
+  }
+}
+
+export async function fetchAndParseFeed(url: string): Promise<FeedItem[]> {
+  const result = await fetchFeed(url)
+  if (result.items === null) throw new Error('Unexpected 304 response without cached feed')
+  return result.items
 }
 
 export type DiscoverResult =

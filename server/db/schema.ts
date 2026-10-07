@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import type { FeedItem } from '../utils/rss'
 
 // Better Auth tables
 export const user = sqliteTable('user', {
@@ -55,6 +56,15 @@ export const sources = sqliteTable('source', {
   url: text('url').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+})
+
+export const feedPollState = sqliteTable('feed_poll_state', {
+  url: text('url').primaryKey(),
+  etag: text('etag'),
+  lastModified: text('last_modified'),
+  items: text('items', { mode: 'json' }).$type<FeedItem[]>(),
+  failures: integer('failures').notNull().default(0),
+  nextPollAt: integer('next_poll_at', { mode: 'timestamp' }),
 })
 
 export const targets = sqliteTable('target', {

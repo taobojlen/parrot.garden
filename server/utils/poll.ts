@@ -18,6 +18,18 @@ const BASE_DELAY_MIN = 5
 const MAX_DELAY_MIN = 60
 const ABANDON_AFTER_MS = 24 * 60 * MIN_MS
 
+export function feedRetryAt(now: Date, failures: number, retryAfter?: string | null): Date {
+  const delay = Math.min(BASE_DELAY_MIN * MIN_MS * 2 ** (failures - 1), ABANDON_AFTER_MS)
+  let retryAt = now.getTime() + delay
+  if (retryAfter) {
+    const requested = /^\d+$/.test(retryAfter.trim())
+      ? now.getTime() + Number(retryAfter) * 1000
+      : Date.parse(retryAfter)
+    if (Number.isFinite(requested)) retryAt = Math.max(retryAt, requested)
+  }
+  return new Date(retryAt)
+}
+
 // Delay before next retry, in minutes. `attempts` is the count including the failure
 // that just occurred: 1 → 5m, 2 → 10m, 3 → 20m, 4 → 40m, 5+ → 60m (capped).
 export function backoffDelayMinutes(attempts: number): number {

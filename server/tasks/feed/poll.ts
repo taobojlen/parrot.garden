@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { processConnectionItems, filterNewItems, type ExistingLog } from '../../utils/poll'
+import { processConnectionItems, filterNewItems, feedRetryAt, type ExistingLog } from '../../utils/poll'
 import { chunk, D1_BATCH_SIZE, SOURCE_ITEM_BATCH_SIZE } from '../../utils/batch'
+import { fetchFeed, FeedFetchError } from '../../utils/rss'
 
 const MAX_ITEMS_PER_FEED = 10
 
@@ -33,16 +34,30 @@ export default defineTask({
     let skipped = 0
 
     for (const [url, connections] of feedsByUrl) {
+      const [state] = await db.select().from(schema.feedPollState)
+        .where(eq(schema.feedPollState.url, url))
+      if (state?.nextPollAt && state.nextPollAt > new Date()) continue
+
       let items
+      let fetched
       try {
-        items = await fetchAndParseFeed(url)
+        fetched = await fetchFeed(url, state?.items ? state : undefined)
+        items = fetched.items ?? state?.items
+        if (!items) throw new Error('Unexpected 304 response without cached feed')
       }
       catch (e) {
+        const failures = (state?.failures ?? 0) + 1
+        const nextPollAt = feedRetryAt(new Date(), failures, e instanceof FeedFetchError ? e.retryAfter : null)
+        await db.insert(schema.feedPollState).values({ url, failures, nextPollAt })
+          .onConflictDoUpdate({ target: schema.feedPollState.url, set: { failures, nextPollAt } })
         console.error(`Failed to fetch feed ${url}:`, e)
         continue
       }
 
       items = items.slice(0, MAX_ITEMS_PER_FEED)
+      const fetchState = { etag: fetched.etag, lastModified: fetched.lastModified, items, failures: 0, nextPollAt: null }
+      await db.insert(schema.feedPollState).values({ url, ...fetchState })
+        .onConflictDoUpdate({ target: schema.feedPollState.url, set: fetchState })
 
       // Upsert items into source_items (preserves original createdAt via onConflictDoNothing)
       const sourceId = connections[0]!.source.id
