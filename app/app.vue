@@ -14,6 +14,9 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <div class="px-4">
+      <ShroudAdvert />
+    </div>
   </UApp>
 </template>
 
