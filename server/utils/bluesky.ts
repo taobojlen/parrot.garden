@@ -124,7 +124,7 @@ export async function verifyBlueskyCredentials(
     })
   }
   catch (error) {
-    throw new Error(`Bluesky authentication failed: ${error instanceof Error ? error.message : error}`)
+    throw new Error(`Bluesky authentication failed: ${error instanceof Error ? error.message : error}`, { cause: error })
   }
 }
 

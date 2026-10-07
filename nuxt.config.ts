@@ -117,7 +117,8 @@ export default defineNuxtConfig({
   },
 
   sitemap: {
-    exclude: ['/dashboard', '/sources/**', '/targets/**', '/connections/**', '/log', '/login'],
+    zeroRuntime: true,
+    exclude: ['/dashboard', '/sources/**', '/targets/**', '/connections/**', '/log', '/login', '/og-image'],
   },
 
   sourcemap: {

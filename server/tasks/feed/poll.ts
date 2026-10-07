@@ -45,7 +45,7 @@ export default defineTask({
       items = items.slice(0, MAX_ITEMS_PER_FEED)
 
       // Upsert items into source_items (preserves original createdAt via onConflictDoNothing)
-      const sourceId = connections[0].source.id
+      const sourceId = connections[0]!.source.id
       const now = new Date()
       for (const batch of chunk(items, SOURCE_ITEM_BATCH_SIZE)) {
         await db.insert(schema.sourceItems).values(batch.map(item => ({

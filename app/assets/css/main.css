@@ -2,6 +2,7 @@
 @import "@nuxt/ui";
 
 @theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --color-charcoal: #313921;
   --color-onyx: #13160D;
   --color-pale-sky: #D1E0E8;
