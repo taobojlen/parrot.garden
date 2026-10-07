@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Tao Bojlén — Notes</title>
+    <description>Short thoughts and passing notes.</description>
+    <link>https://btao.org/</link>
+    <item>
+      <title>now that echofeed is shutting down, some of you might be looking for an alternative way to post your…</title>
+      <link>https://btao.org/notes/mePqU0ObJgDMXBihF-ipU/</link>
+      <guid isPermaLink="true">https://btao.org/notes/mePqU0ObJgDMXBihF-ipU/</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 GMT</pubDate>
+      <content:encoded>&lt;p&gt;now that echofeed is shutting down, some of you might be looking for an alternative way to post your RSS feeds to bluesky or mastodon.&lt;/p&gt;
+&lt;p&gt;i built &lt;a href=&quot;http://parrot.garden/&quot;&gt;http://parrot.garden/&lt;/a&gt; for this a while back. it’s totally free and will stay that way! feature requests are welcome :)&lt;/p&gt;
+</content:encoded>
+    </item>
+  </channel>
+</rss>

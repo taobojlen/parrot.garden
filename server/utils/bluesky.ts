@@ -77,7 +77,14 @@ async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | 
     if (protocol !== 'http:' && protocol !== 'https:') return undefined
 
     const response = await fetch(url)
-    if (!response.ok) return undefined
+    if (!response.ok) {
+      console.warn('Bluesky link card fetch failed', {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+      })
+      return undefined
+    }
 
     const doc = parseHtml(await response.text())
     const title = doc.querySelector('meta[property="og:title"]')?.getAttribute('content')
@@ -107,7 +114,11 @@ async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | 
       external,
     }
   }
-  catch {
+  catch (error) {
+    console.warn('Bluesky link card creation failed', {
+      url,
+      error: error instanceof Error ? error.message : String(error),
+    })
     return undefined
   }
 }

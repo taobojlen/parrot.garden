@@ -1,5 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { postToBluesky, resolvePdsUrl, verifyBlueskyCredentials } from '../../server/utils/bluesky'
+import { parseFeed } from '../../server/utils/rss'
+import { renderTemplate, truncatePost } from '../../server/utils/template'
 import type { FeedImage } from '../../server/utils/rss'
 
 // Mock @atproto/api
@@ -66,11 +69,16 @@ function mockFetchForPds() {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
   mockPost.mockResolvedValue({ uri: 'at://did:plc:test/post/1', cid: 'bafytest' })
   mockUploadBlob.mockResolvedValue({
     data: { blob: { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 } },
   })
   mockFetchForPds()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 describe('postToBluesky', () => {
@@ -127,6 +135,48 @@ describe('postToBluesky', () => {
 
     expect(mockPost.mock.calls[0][0].embed).toBeUndefined()
     expect(mockFetch).toHaveBeenCalledTimes(2) // Handle resolution and DID document only
+  })
+
+  it('embeds parrot.garden from the btao.org note rather than its feed permalink', async () => {
+    const [item] = parseFeed(readFileSync('tests/fixtures/btao-parrot-note.xml', 'utf8'))
+    const defaultFetch = mockFetch.getMockImplementation()!
+    mockFetch.mockImplementation((url: string) => {
+      if (url === 'http://parrot.garden/') {
+        return Promise.resolve(new Response(`
+          <meta property="og:title" content="parrot.garden — Cross-post RSS to Bluesky &amp; Mastodon">
+          <meta property="og:description" content="POSSE your content — automatically syndicate your RSS feeds to Bluesky, Mastodon, and more. Publish on your own site, share everywhere.">
+          <meta property="og:image" content="https://parrot.garden/og-image.webp">
+        `))
+      }
+      if (url === 'https://parrot.garden/og-image.webp') {
+        return Promise.resolve(new Response(new Uint8Array([1, 2, 3]), {
+          headers: { 'content-type': 'image/webp' },
+        }))
+      }
+      return defaultFetch(url)
+    })
+
+    const text = truncatePost(renderTemplate('{{content}}', { content: item!.content }), 300)
+    await postToBluesky(credentials, text, item!.images)
+
+    expect(mockPost.mock.calls[0][0]).toMatchObject({
+      text: 'now that echofeed is shutting down, some of you might be looking for an alternative way to post your RSS feeds to bluesky or mastodon.\ni built http://parrot.garden/ for this a while back. it’s totally free and will stay that way! feature requests are welcome :)',
+      facets: [{
+        features: [{ $type: 'app.bsky.richtext.facet#link', uri: 'http://parrot.garden/' }],
+        index: { byteStart: 143, byteEnd: 164 },
+      }],
+      embed: {
+        $type: 'app.bsky.embed.external',
+        external: {
+          uri: 'http://parrot.garden/',
+          title: 'parrot.garden — Cross-post RSS to Bluesky & Mastodon',
+          description: 'POSSE your content — automatically syndicate your RSS feeds to Bluesky, Mastodon, and more. Publish on your own site, share everywhere.',
+          thumb: { ref: { $link: 'blob-ref-123' }, mimeType: 'image/jpeg', size: 1234 },
+        },
+      },
+    })
+    expect(mockUploadBlob).toHaveBeenCalledWith(new Uint8Array([1, 2, 3]), { encoding: 'image/webp' })
+    expect(mockFetch).not.toHaveBeenCalledWith(item!.link)
   })
 
   it.each([
@@ -438,6 +488,45 @@ describe('postToBluesky', () => {
     expect(postArg.embed.images).toHaveLength(1)
     expect(postArg.embed.images[0].alt).toBe('Found')
   })
+
+  it('logs the URL and HTTP status when a card fetch fails, then posts without a card', async () => {
+    const defaultFetch = mockFetch.getMockImplementation()!
+    mockFetch.mockImplementation((url: string) => {
+      if (url === 'http://parrot.garden/') {
+        return Promise.resolve(new Response(null, { status: 522, statusText: 'Connection timed out' }))
+      }
+      return defaultFetch(url)
+    })
+
+    await expect(postToBluesky(credentials, 'Read http://parrot.garden/'))
+      .resolves.toEqual({ uri: 'at://did:plc:test/post/1', cid: 'bafytest' })
+
+    expect(console.warn).toHaveBeenCalledExactlyOnceWith('Bluesky link card fetch failed', {
+      url: 'http://parrot.garden/',
+      status: 522,
+      statusText: 'Connection timed out',
+    })
+    expect(mockPost.mock.calls[0][0].embed).toBeUndefined()
+  })
+
+  it.each([new Error('Fetch failed'), 'Fetch failed'])(
+    'logs card exceptions and still posts: %s', async (error) => {
+      const defaultFetch = mockFetch.getMockImplementation()!
+      mockFetch.mockImplementation((url: string) => {
+        if (url === 'http://parrot.garden/') return Promise.reject(error)
+        return defaultFetch(url)
+      })
+
+      await expect(postToBluesky(credentials, 'Read http://parrot.garden/'))
+        .resolves.toEqual({ uri: 'at://did:plc:test/post/1', cid: 'bafytest' })
+
+      expect(console.warn).toHaveBeenCalledExactlyOnceWith('Bluesky link card creation failed', {
+        url: 'http://parrot.garden/',
+        error: 'Fetch failed',
+      })
+      expect(mockPost.mock.calls[0][0].embed).toBeUndefined()
+    },
+  )
 
   it('posts without embed when images and linked page fail to download', async () => {
     mockFetch.mockImplementation((url: string) => {

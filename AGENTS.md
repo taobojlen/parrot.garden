@@ -63,7 +63,8 @@ Production magic-link email uses the Cloudflare Worker `EMAIL` binding configure
 
 ## Development practices
 
-- **Always use red/green TDD.** Write a failing test first, then write the minimal code to make it pass, then refactor. No implementation code without a failing test.
+- Use red/green TDD where it makes sense. Integration and e2e tests are often more useful than unit tests.
+- **Never test configuration by asserting its declared values.** Test observable behavior instead. Importing a config and checking for a flag does not verify that the flag fixes the behavior.
 
 <!-- skilld -->
 Before modifying code, evaluate each installed skill against the current task.

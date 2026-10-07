@@ -50,7 +50,7 @@ export default defineNuxtConfig({
       wrangler: {
         name: 'parrot',
         workers_dev: false,
-        compatibility_flags: ['nodejs_compat'],
+        compatibility_flags: ['nodejs_compat', 'global_fetch_strictly_public'],
         d1_databases: [
           { binding: 'DB', database_id: '7d8c14ce-b905-4974-aced-b700006eff96' },
         ],
