@@ -17,9 +17,9 @@
     "@nuxt/ui": "4.5.1",
     "@nuxthub/core": "0.10.7",
     "@nuxtjs/seo": "^4.0.2",
+    "@posthog/nuxt": "^1.7.91",
     "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
-    "@sentry/nuxt": "^10.44.0",
     "@tailwindcss/vite": "^4.2.1",
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
@@ -46,5 +46,7 @@
     "vitest": "^4.1.0",
     "wrangler": "^4.75.0"
   },
-  "pnpm": {}
+  "pnpm": {
+    "onlyBuiltDependencies": ["@posthog/cli"]
+  }
 }

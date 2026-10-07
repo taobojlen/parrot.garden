@@ -33,7 +33,7 @@ RSS Source → (feed:poll task every 5min) → parse items → render template �
 - **Database:** Drizzle ORM + SQLite (Cloudflare D1 in prod, local SQLite in dev)
 - **Auth:** better-auth with magic link (via Cloudflare Email Service)
 - **Deployment:** Cloudflare Workers via @nuxthub/core
-- **Monitoring:** Sentry
+- **Monitoring:** PostHog error tracking on the client and Nitro server
 
 ### Key directories
 

@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@sentry/nuxt/module', '@nuxtjs/seo'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@posthog/nuxt', '@nuxtjs/seo'],
   css: ['~/assets/css/main.css'],
 
   vite: {
@@ -35,6 +35,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    rollupConfig: {
+      output: {
+        sourcemapExcludeSources: false,
+      },
+    },
     experimental: {
       tasks: true,
     },
@@ -71,10 +76,24 @@ export default defineNuxtConfig({
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
-    public: {
-      posthogPublicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
-      posthogHost: 'https://ph.btao.org',
-      posthogDefaults: '2026-01-30'
+  },
+
+  posthogConfig: {
+    publicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
+    host: process.env.POSTHOG_CLI_HOST || 'https://ph.btao.org',
+    clientConfig: {
+      api_host: 'https://ph.btao.org',
+      defaults: '2026-01-30',
+      capture_exceptions: true,
+    },
+    serverConfig: {
+      host: 'https://ph.btao.org',
+      enableExceptionAutocapture: true,
+    },
+    sourcemaps: {
+      enabled: Boolean(process.env.POSTHOG_CLI_API_KEY && process.env.POSTHOG_CLI_PROJECT_ID),
+      personalApiKey: process.env.POSTHOG_CLI_API_KEY,
+      projectId: process.env.POSTHOG_CLI_PROJECT_ID,
     },
   },
 
@@ -99,11 +118,6 @@ export default defineNuxtConfig({
 
   sitemap: {
     exclude: ['/dashboard', '/sources/**', '/targets/**', '/connections/**', '/log', '/login'],
-  },
-
-  sentry: {
-    org: 'mori-technologies',
-    project: 'parrotgarden',
   },
 
   sourcemap: {

@@ -46,6 +46,16 @@ NUXT_BETTER_AUTH_URL=
 
 Production email is sent through the Worker's `EMAIL` binding. The `parrot.garden` domain must be onboarded in Cloudflare Email Service; no email API key is required.
 
+PostHog captures browser, Vue, and Nitro request exceptions through `@posthog/nuxt`. Events use `https://ph.btao.org`.
+
+For readable production stack traces, set these build-time environment variables:
+
+- `POSTHOG_CLI_HOST`: the PostHog API host for your region (for example, `https://us.posthog.com` or `https://eu.posthog.com`), not an ingestion-only proxy.
+- `POSTHOG_CLI_PROJECT_ID`: your PostHog project ID.
+- `POSTHOG_CLI_API_KEY`: a personal API key with `organization:read` and `error_tracking:write` scopes.
+
+Source-map uploads run during production builds when the project ID and personal API key are set. The key stays out of runtime config and client bundles. Without these credentials, exception capture still works, but source maps are not uploaded. Check the build logs for upload failures and verify errors in PostHog after deployment.
+
 ### Testing
 
 ```bash
