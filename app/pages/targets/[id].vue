@@ -27,7 +27,7 @@
           <template v-if="form.type === 'mastodon'">
             <USeparator />
             <UFormField label="Instance">
-              <p class="text-sm text-sky-reflection">{{ target?.instanceUrl }}</p>
+              <p class="text-sm text-muted">{{ target?.instanceUrl }}</p>
             </UFormField>
           </template>
         </div>

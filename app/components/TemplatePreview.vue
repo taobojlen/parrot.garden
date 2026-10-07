@@ -7,7 +7,7 @@
         <span class="text-sm text-pale-sky">How your recent posts would appear</span>
       </div>
     </template>
-    <div v-if="loading" class="py-4 text-center text-sm text-pale-sky/50">
+    <div v-if="loading" class="py-4 text-center text-sm text-muted">
       Loading feed items...
     </div>
     <div v-else-if="previewItems.length" class="space-y-3">
@@ -31,7 +31,7 @@
           <p v-if="item.truncated" class="text-xs text-warning">
             Truncated ({{ item.graphemes }}/{{ maxCharacters }} graphemes)
           </p>
-          <p v-else class="text-xs text-pale-sky/70">
+          <p v-else class="text-xs text-muted">
             {{ item.graphemes }}/{{ maxCharacters }} graphemes
           </p>
           <UTooltip v-if="connectionId && props.hasUnsavedChanges" text="Save your changes first" :delay-duration="0">
@@ -74,13 +74,13 @@
         />
       </div>
     </div>
-    <p v-else class="py-4 text-center text-sm text-pale-sky/50">No items in feed</p>
+    <p v-else class="py-4 text-center text-sm text-muted">No items in feed</p>
 
     <UModal v-model:open="confirmOpen">
       <template #content>
         <div class="p-6 space-y-4">
           <h3 class="font-semibold text-lg">Confirm post</h3>
-          <p class="text-sm text-pale-sky/80 whitespace-pre-wrap">{{ confirmText }}</p>
+          <p class="text-sm text-muted whitespace-pre-wrap">{{ confirmText }}</p>
           <div class="flex justify-end gap-2">
             <UButton variant="ghost" @click="confirmOpen = false">Cancel</UButton>
             <UButton color="primary" icon="i-lucide-send" :loading="postingIndex !== null" @click="confirmAndPost">Post</UButton>

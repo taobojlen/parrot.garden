@@ -3,7 +3,7 @@
     <template #content>
       <div class="p-6 space-y-4">
         <h3 class="font-semibold text-lg">{{ title }}</h3>
-        <p class="text-sm text-pale-sky/80">{{ message }}</p>
+        <p class="text-sm text-muted">{{ message }}</p>
         <div class="flex justify-end gap-2">
           <UButton variant="ghost" @click="open = false">Cancel</UButton>
           <UButton :color="confirmColor" :icon="confirmIcon" :loading="loading" @click="$emit('confirm')">

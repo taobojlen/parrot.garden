@@ -25,10 +25,10 @@
           </UBadge>
         </template>
         <template #error-cell="{ row }">
-          <span v-if="row.original.error" class="text-sm text-sky-reflection/70 truncate max-w-48 block">
+          <span v-if="row.original.error" class="text-sm text-muted truncate max-w-48 block">
             {{ row.original.error }}
           </span>
-          <span v-else class="text-sm text-sky-reflection/50">&mdash;</span>
+          <span v-else class="text-sm text-muted">&mdash;</span>
         </template>
         <template #actions-cell="{ row }">
           <UButton
@@ -44,7 +44,7 @@
           </UButton>
         </template>
       </UTable>
-      <p v-else class="text-sm text-sky-reflection/50  text-center py-4">No posts yet</p>
+      <p v-else class="text-sm text-muted  text-center py-4">No posts yet</p>
     </UCard>
   </div>
 </template>

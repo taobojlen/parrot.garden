@@ -41,7 +41,7 @@
 
   .bg-default {
     --tw-bg-opacity: 1;
-    background-color: rgba(0, 0, 0, 0.45) !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
     backdrop-filter: blur(16px) saturate(150%) !important;
     border-radius: 0.875rem !important;
     box-shadow:
@@ -91,7 +91,7 @@
 }
 
 [data-slot="content"] {
-  background-color: rgba(0, 0, 0, 0.45) !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
   backdrop-filter: blur(16px) saturate(150%) !important;
   border: none !important;
   border-radius: 1.25rem !important;
@@ -111,10 +111,11 @@
 :root {
   --ui-primary: var(--color-sky-100);
   --ui-error: #f08080;
+  --ui-text: var(--color-pale-sky);
+  --ui-text-toned: var(--color-pale-sky);
   --ui-bg-elevated: rgba(0, 0, 0, 0.15);
   --ui-bg-accented: rgba(0, 0, 0, 0.2);
   --ui-border: rgba(255, 255, 255, 0.15);
   --ui-border-muted: rgba(255, 255, 255, 0.1);
   --ui-border-accented: rgba(255, 255, 255, 0.2);
 }
-

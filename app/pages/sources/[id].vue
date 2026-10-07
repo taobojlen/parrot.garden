@@ -78,11 +78,11 @@
         >
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium truncate">{{ item.title || 'Untitled' }}</p>
-            <p v-if="item.pubDate" class="text-xs text-sky-reflection/70">{{ item.pubDate }}</p>
+            <p v-if="item.pubDate" class="text-xs text-muted">{{ item.pubDate }}</p>
           </div>
         </a>
       </div>
-      <p v-else class="text-sm text-sky-reflection/50 text-center py-4">
+      <p v-else class="text-sm text-muted text-center py-4">
         No items in feed.
       </p>
     </UCard>
@@ -111,7 +111,7 @@
               {{ post.itemTitle || 'Untitled' }}
             </a>
             <p v-else class="text-sm font-medium truncate">{{ post.itemTitle || 'Untitled' }}</p>
-            <p class="text-xs text-sky-reflection/70">
+            <p class="text-xs text-muted">
               → {{ post.targetName }}
             </p>
           </div>
