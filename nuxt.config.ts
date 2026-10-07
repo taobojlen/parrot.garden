@@ -14,7 +14,9 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@posthog/nuxt', '@nuxtjs/seo'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxthub/core', '@nuxtjs/seo',
+    ...(process.env.POSTHOG_PUBLIC_KEY ? ['@posthog/nuxt'] : []),
+  ],
   css: ['~/assets/css/main.css'],
 
   vite: {
@@ -35,6 +37,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: 'cloudflare_module',
     rollupConfig: {
       output: {
         sourcemapExcludeSources: false,
@@ -46,48 +49,24 @@ export default defineNuxtConfig({
     scheduledTasks: {
       '*/5 * * * *': ['feed:poll'],
     },
-    cloudflare: {
-      wrangler: {
-        name: 'parrot',
-        workers_dev: false,
-        compatibility_flags: ['nodejs_compat', 'global_fetch_strictly_public'],
-        d1_databases: [
-          { binding: 'DB', database_id: '7d8c14ce-b905-4974-aced-b700006eff96' },
-        ],
-        send_email: [
-          {
-            name: 'EMAIL',
-            allowed_sender_addresses: ['noreply@parrot.garden'],
-          },
-        ],
-        observability: {
-          logs: {
-            enabled: true,
-            invocation_logs: true,
-          },
-        },
-        triggers: {
-          crons: ['*/5 * * * *'],
-        },
-      },
-    },
   },
 
   runtimeConfig: {
     betterAuthSecret: '',
     betterAuthUrl: '',
+    emailFrom: 'noreply@parrot.garden',
   },
 
   posthogConfig: {
-    publicKey: 'phc_Gpo6CeYuXk1aGfUIrsUwlSCdrfLx5W5tSpViXQR0GwM',
-    host: process.env.POSTHOG_CLI_HOST || 'https://ph.btao.org',
+    publicKey: process.env.POSTHOG_PUBLIC_KEY || '',
+    host: process.env.POSTHOG_CLI_HOST || process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
     clientConfig: {
-      api_host: 'https://ph.btao.org',
+      api_host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
       defaults: '2026-01-30',
       capture_exceptions: true,
     },
     serverConfig: {
-      host: 'https://ph.btao.org',
+      host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
       enableExceptionAutocapture: true,
     },
     sourcemaps: {
@@ -98,7 +77,7 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: 'https://parrot.garden',
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://parrot.garden',
     name: 'parrot.garden',
     description: 'POSSE your content — automatically syndicate your RSS feeds to Bluesky, Mastodon, and more. Publish on your own site, share everywhere.',
     defaultLocale: 'en',

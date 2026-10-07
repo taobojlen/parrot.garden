@@ -23,6 +23,7 @@ export function serverAuth() {
               url,
               isDevelopment: import.meta.dev,
               sender,
+              fromEmail: useRuntimeConfig().emailFrom,
             })
           },
         }),

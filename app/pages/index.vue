@@ -87,9 +87,6 @@
           </h2>
           <p class="text-pale-sky leading-relaxed">
             I built this to scratch my own itch.
-            Feel free to use it for anything you want
-            whether it's personal or commercial.
-
             No cost or need to host anything yourself!
           </p>
         </div>

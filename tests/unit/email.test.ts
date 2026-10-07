@@ -59,6 +59,18 @@ describe('getCloudflareEmailSender', () => {
 })
 
 describe('deliverMagicLink', () => {
+  it('uses the configured sender address in production', async () => {
+    const send = vi.fn().mockResolvedValue({})
+    await deliverMagicLink({
+      email: 'reader@example.com',
+      url: 'https://blog.example/magic-link',
+      isDevelopment: false,
+      sender: { send },
+      fromEmail: 'login@blog.example',
+    })
+    expect(send.mock.calls[0]![0].from.email).toBe('login@blog.example')
+  })
+
   it('logs the magic link without sending in development', async () => {
     const send = vi.fn()
     const log = vi.fn()

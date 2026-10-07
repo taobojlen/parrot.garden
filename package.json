@@ -5,10 +5,28 @@
   "packageManager": "pnpm@10.18.1",
   "scripts": {
     "build": "NODE_OPTIONS='--max-old-space-size=4096' nuxt build",
+    "deploy": "pnpm run db:migrations:apply && wrangler deploy --config wrangler.jsonc",
+    "deploy:production": "pnpm run db:migrations:apply --env production && wrangler deploy --config wrangler.jsonc --env production",
+    "db:migrations:apply": "wrangler d1 migrations apply DB --remote --config wrangler.jsonc",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
+  },
+  "cloudflare": {
+    "bindings": {
+      "DB": { "description": "Stores accounts, feeds, connections, and post history." },
+      "EMAIL": { "description": "Requires a domain onboarded in Cloudflare Email Service for sign-in emails." },
+      "NUXT_BETTER_AUTH_SECRET": { "description": "Generate with `openssl rand -base64 32`. Keep private and stable across deployments." },
+      "NUXT_BETTER_AUTH_URL": { "description": "Your instance's HTTPS URL, such as `https://parrot.your-account.workers.dev`. Replace the development default." },
+      "NUXT_EMAIL_FROM": { "description": "Sender address on your onboarded Cloudflare Email Service domain." },
+      "NUXT_PUBLIC_SITE_URL": { "description": "Your instance's HTTPS URL. Also set this in the build environment for site metadata." },
+      "POSTHOG_PUBLIC_KEY": { "description": "Optional. Set in the build environment to enable your own PostHog project; leave empty to disable." },
+      "POSTHOG_HOST": { "description": "Optional PostHog ingestion host, configured at build time." },
+      "POSTHOG_CLI_HOST": { "description": "Optional build-only PostHog API host for source-map uploads." },
+      "POSTHOG_CLI_PROJECT_ID": { "description": "Optional build-only project ID for source-map uploads." },
+      "POSTHOG_CLI_API_KEY": { "description": "Optional build-only personal API key for source-map uploads. Never expose publicly." }
+    }
   },
   "dependencies": {
     "@atproto/api": "^0.23.2",

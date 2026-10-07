@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "parrot",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2025-07-15",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "assets": {
+    "directory": ".output/public",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "parrot-db",
+    "migrations_table": "_hub_migrations",
+    "migrations_dir": ".output/server/db/migrations/sqlite"
+  }],
+  "send_email": [{ "name": "EMAIL" }],
+  "observability": {
+    "logs": { "enabled": true, "invocation_logs": true }
+  },
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "env": {
+    "production": {
+      "name": "parrot",
+      "workers_dev": false,
+      "d1_databases": [{
+        "binding": "DB",
+        "database_id": "7d8c14ce-b905-4974-aced-b700006eff96",
+        "migrations_table": "_hub_migrations",
+        "migrations_dir": ".output/server/db/migrations/sqlite"
+      }],
+      "send_email": [{
+        "name": "EMAIL",
+        "allowed_sender_addresses": ["noreply@parrot.garden"]
+      }],
+      "triggers": { "crons": ["*/5 * * * *"] }
+    }
+  }
+}

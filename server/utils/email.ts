@@ -31,6 +31,7 @@ interface DeliverMagicLinkOptions {
   url: string
   isDevelopment: boolean
   sender?: EmailSender
+  fromEmail?: string
   log?: (message: string) => void
 }
 
@@ -44,6 +45,7 @@ export async function sendMagicLinkEmail(
   sender: EmailSender,
   email: string,
   url: string,
+  fromEmail = 'noreply@parrot.garden',
 ): Promise<void> {
   const [html, text] = await Promise.all([
     render(MagicLinkEmail({ url })),
@@ -53,7 +55,7 @@ export async function sendMagicLinkEmail(
   await sender.send({
     from: {
       name: 'parrot.garden',
-      email: 'noreply@parrot.garden',
+      email: fromEmail,
     },
     to: email,
     subject: 'Sign in to parrot.garden',
@@ -67,6 +69,7 @@ export async function deliverMagicLink({
   url,
   isDevelopment,
   sender,
+  fromEmail,
   log = console.log,
 }: DeliverMagicLinkOptions): Promise<void> {
   if (isDevelopment) {
@@ -78,5 +81,5 @@ export async function deliverMagicLink({
     throw new Error('Cloudflare EMAIL binding is not configured')
   }
 
-  await sendMagicLinkEmail(sender, email, url)
+  await sendMagicLinkEmail(sender, email, url, fromEmail)
 }

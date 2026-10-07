@@ -13,10 +13,12 @@ afterEach(() => {
 
 describe('PostHog error tracking', () => {
   it('enables client and server exception capture', async () => {
+    vi.stubEnv('POSTHOG_PUBLIC_KEY', 'phc_instance')
+    vi.stubEnv('POSTHOG_HOST', 'https://eu.i.posthog.com')
     const config = await loadConfig()
     expect(config.modules).toContain('@posthog/nuxt')
     expect(config.posthogConfig.clientConfig).toMatchObject({
-      api_host: 'https://ph.btao.org',
+      api_host: 'https://eu.i.posthog.com',
       defaults: '2026-01-30',
       capture_exceptions: true,
     })
