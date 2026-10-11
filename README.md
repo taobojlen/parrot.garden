@@ -108,6 +108,14 @@ npx vitest            # Watch mode
 npx vitest run        # Run once
 ```
 
+The retry end-to-end test runs the built Worker with local D1, authentication, and the Images binding. Feed downloads and Bluesky HTTP responses are simulated; it does not publish posts or access production data.
+
+```bash
+POSTHOG_CLI_API_KEY= POSTHOG_CLI_PROJECT_ID= pnpm build
+pnpm exec wrangler deploy --dry-run --config wrangler.jsonc --outdir .output/retry-test
+node tests/e2e/post-retry.cjs
+```
+
 ### Build
 
 ```bash

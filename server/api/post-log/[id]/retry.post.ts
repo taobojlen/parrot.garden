@@ -9,6 +9,7 @@ export default eventHandler(async (event) => {
   const [log] = await db.select()
     .from(schema.postLogs)
     .innerJoin(schema.connections, eq(schema.postLogs.connectionId, schema.connections.id))
+    .innerJoin(schema.sources, eq(schema.connections.sourceId, schema.sources.id))
     .innerJoin(schema.targets, eq(schema.connections.targetId, schema.targets.id))
     .where(and(
       eq(schema.postLogs.id, id),
@@ -41,11 +42,19 @@ export default eventHandler(async (event) => {
   const now = new Date()
 
   try {
+    let images
+    if (connection.includeImages) {
+      const items = await fetchAndParseFeed(log.source.url)
+      const item = items.find(item => item.guid === postLog.itemGuid)
+      if (!item) throw new Error('Cannot retry with images: item is no longer in the source feed')
+      images = item.images
+    }
+
     const credentials = JSON.parse(target.credentials)
     if (target.type === 'bluesky') {
-      await postToBluesky(credentials, text)
+      await postToBluesky(credentials, text, images)
     } else if (target.type === 'mastodon') {
-      await postToMastodon(credentials, text)
+      await postToMastodon(credentials, text, images)
     }
 
     await db.update(schema.postLogs)
