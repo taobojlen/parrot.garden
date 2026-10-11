@@ -48,6 +48,24 @@ export async function resolvePdsUrl(
   return pdsService.serviceEndpoint
 }
 
+const MAX_IMAGE_BYTES = 2_000_000
+
+class ImageResizeError extends Error {}
+
+async function resizeImage(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+  const { env } = await import('cloudflare:workers')
+  if (!env.IMAGES) throw new Error('Cloudflare IMAGES binding is not configured')
+
+  for (const size of [2048, 1536, 1024, 512]) {
+    const result = await env.IMAGES.input(new Blob([buffer]).stream())
+      .transform({ width: size, height: size, fit: 'scale-down' })
+      .output({ format: 'image/webp', quality: 80, anim: false })
+    const resized = await result.response().arrayBuffer()
+    if (resized.byteLength <= MAX_IMAGE_BYTES) return resized
+  }
+  throw new Error('Image still exceeds the 2 MB limit after resizing')
+}
+
 async function downloadAndUploadImage(
   agent: AtpAgent,
   image: FeedImage,
@@ -56,8 +74,17 @@ async function downloadAndUploadImage(
     const response = await fetch(image.url)
     if (!response.ok) return null
 
-    const contentType = response.headers.get('content-type') ?? 'image/jpeg'
-    const buffer = await response.arrayBuffer()
+    let contentType = response.headers.get('content-type') ?? 'image/jpeg'
+    let buffer = await response.arrayBuffer()
+    if (buffer.byteLength > MAX_IMAGE_BYTES) {
+      try {
+        buffer = await resizeImage(buffer)
+        contentType = 'image/webp'
+      }
+      catch (error) {
+        throw new ImageResizeError(`Cannot resize Bluesky image ${image.url}: ${error instanceof Error ? error.message : error}`, { cause: error })
+      }
+    }
     const uint8 = new Uint8Array(buffer)
 
     const uploadResponse = await agent.uploadBlob(uint8, { encoding: contentType })
@@ -66,7 +93,8 @@ async function downloadAndUploadImage(
       image: uploadResponse.data.blob,
     }
   }
-  catch {
+  catch (error) {
+    if (error instanceof ImageResizeError) throw error
     return null
   }
 }
@@ -104,7 +132,8 @@ async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | 
         })
         if (uploaded) external.thumb = uploaded.image
       }
-      catch {
+      catch (error) {
+        if (error instanceof ImageResizeError) throw error
         // A bad optional thumbnail should not prevent the link card.
       }
     }
@@ -115,6 +144,7 @@ async function createExternalEmbed(agent: AtpAgent, url: string): Promise<any | 
     }
   }
   catch (error) {
+    if (error instanceof ImageResizeError) throw error
     console.warn('Bluesky link card creation failed', {
       url,
       error: error instanceof Error ? error.message : String(error),

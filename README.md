@@ -13,7 +13,7 @@ You need a Cloudflare account and a domain onboarded for outbound sending in [Cl
 3. Set `NUXT_BETTER_AUTH_SECRET` to a random value generated with `openssl rand -base64 32`. Set `NUXT_EMAIL_FROM` to your onboarded sender address. Keep the authentication secret private and stable across deployments.
 4. Set `NUXT_BETTER_AUTH_URL` to your instance's HTTPS address, not the development address from `.env.example`. Use a custom domain or the `https://<worker-name>.<account-subdomain>.workers.dev` address. Set `NUXT_PUBLIC_SITE_URL` to the same address in the build environment.
 5. Use `pnpm run build` as the build command and `pnpm run deploy` as the deploy command. The deploy command applies migrations to the provisioned `DB` binding before publishing the Worker.
-6. Verify the Worker has the `DB` and `EMAIL` bindings and a five-minute cron trigger. Open your instance and request a sign-in email.
+6. Verify the Worker has the `DB`, `EMAIL`, and `IMAGES` bindings and a five-minute cron trigger. Open your instance and request a sign-in email.
 
 Authentication and sender settings must be available as Worker variables/secrets, not only build variables. If the setup flow does not populate them, add them under the Worker's Settings → Variables and Secrets. If you change the public address, update both URL settings and rebuild.
 
@@ -49,6 +49,10 @@ The hosted parrot.garden service uses `pnpm run deploy:production`. This selects
 4. New feed items are automatically posted to your social accounts every 5 minutes
 
 Templates support variables like `{{title}}`, `{{link}}`, `{{description}}`, `{{content}}`, `{{author}}`, and `{{date}}` with automatic truncation to fit platform character limits.
+
+Bluesky images and link-card thumbnails over 2 MB are resized through the Cloudflare `IMAGES` binding. Smaller images are uploaded unchanged. Resizing preserves aspect ratio and alt text, converts to static WebP, and tries up to four sizes to meet the byte limit. Conversion failures appear in the post log and use the normal retry schedule. Mastodon uploads are unchanged.
+
+The Images Free plan includes 5,000 unique transformations per month; new transformations fail if that allowance is exhausted. No Images storage is required. See [Cloudflare Images pricing](https://developers.cloudflare.com/images/pricing/) for limits and paid-plan charges.
 
 ## Stack
 

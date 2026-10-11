@@ -16,6 +16,7 @@
     "migrations_dir": ".output/server/db/migrations/sqlite"
   }],
   "send_email": [{ "name": "EMAIL" }],
+  "images": { "binding": "IMAGES" },
   "observability": {
     "logs": { "enabled": true, "invocation_logs": true }
   },
@@ -34,6 +35,7 @@
         "name": "EMAIL",
         "allowed_sender_addresses": ["noreply@parrot.garden"]
       }],
+      "images": { "binding": "IMAGES" },
       "triggers": { "crons": ["*/5 * * * *"] }
     }
   }

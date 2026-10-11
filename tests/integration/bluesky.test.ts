@@ -20,7 +20,11 @@ let postStatus: number
 let did: string
 let pdsServices: { id: string; type: string; serviceEndpoint: string }[]
 
+const { cloudflareEnv } = vi.hoisted(() => ({ cloudflareEnv: {} as typeof import('cloudflare:workers').env }))
+vi.mock('cloudflare:workers', () => ({ env: cloudflareEnv }))
+
 beforeEach(() => {
+  cloudflareEnv.IMAGES = undefined
   vi.spyOn(console, 'warn').mockImplementation(() => {})
   requests = []
   pages = new Map()
@@ -71,6 +75,16 @@ async function record() {
   const body = await request.clone().json()
   expect(body).toMatchObject({ repo: did, collection: 'app.bsky.feed.post' })
   return body.record
+}
+
+function mockImageTransforms(output: () => Uint8Array<ArrayBuffer>) {
+  cloudflareEnv.IMAGES = {
+    input: () => ({
+      transform: () => ({
+        output: async () => ({ response: () => new Response(output(), { headers: { 'content-type': 'image/webp' } }) }),
+      }),
+    }),
+  }
 }
 
 describe('Bluesky publishing through the real AT Protocol SDK', () => {
@@ -211,6 +225,58 @@ describe('Bluesky publishing through the real AT Protocol SDK', () => {
     expect((await record()).embed).toEqual(pageAvailable
       ? { $type: 'app.bsky.embed.external', external: { uri: PAGE, title: 'Fallback card', description: '' } }
       : undefined)
+  })
+
+  it.each([2_000_000, 2_000_001])('uploads images within the size limit, preserving alt text: %s bytes', async (size) => {
+    const original = new Uint8Array(size).fill(7)
+    const resized = new Uint8Array([4, 5, 6])
+    pages.set(PHOTO, () => new Response(original, { headers: { 'content-type': 'image/png' } }))
+    mockImageTransforms(() => resized)
+    await postToBluesky(credentials, 'Photo', [{ url: PHOTO, alt: 'A signed book' }])
+    const upload = requests.find(request => request.url.endsWith('/com.atproto.repo.uploadBlob'))!
+    expect(Buffer.from(await upload.arrayBuffer()).equals(size <= 2_000_000 ? original : resized)).toBe(true)
+    expect(upload.headers.get('content-type')).toBe(size <= 2_000_000 ? 'image/png' : 'image/webp')
+    expect((await record()).embed.images[0].alt).toBe('A signed book')
+  })
+
+  it.each(['photo', 'thumbnail'])('reduces an oversized %s again if the first output exceeds the limit', async (kind) => {
+    const oversized = new Uint8Array(2_000_001)
+    const resized = new Uint8Array([9, 8, 7, 6])
+    const outputs = [oversized, resized]
+    mockImageTransforms(() => outputs.shift()!)
+    pages.set(PHOTO, () => new Response(oversized, { headers: { 'content-type': 'image/png' } }))
+    pages.set(PAGE, () => new Response(`<meta property="og:image" content="${PHOTO}">`))
+    await postToBluesky(credentials, `Read ${PAGE}`, kind === 'photo' ? [{ url: PHOTO, alt: 'A signed book' }] : undefined)
+    const uploads = requests.filter(request => request.url.endsWith('/com.atproto.repo.uploadBlob'))
+    expect(uploads).toHaveLength(1)
+    expect(new Uint8Array(await uploads[0]!.arrayBuffer())).toEqual(resized)
+    const embed = (await record()).embed
+    expect(kind === 'photo' ? embed.images[0].image.mimeType : embed.external.thumb.mimeType).toBe('image/webp')
+  })
+
+  it.each(['photo', 'thumbnail'])('reports conversion failures for an oversized %s without publishing', async (kind) => {
+    mockImageTransforms(() => { throw new Error('Images quota exceeded') })
+    pages.set(PHOTO, () => new Response(new Uint8Array(2_000_001)))
+    pages.set(PAGE, () => new Response(`<meta property="og:image" content="${PHOTO}">`))
+    await expect(postToBluesky(credentials, `Read ${PAGE}`, kind === 'photo' ? [{ url: PHOTO, alt: '' }] : undefined))
+      .rejects.toThrow('Images quota exceeded')
+    expect(requests.some(request => request.url.endsWith('/com.atproto.repo.createRecord'))).toBe(false)
+  })
+
+  it('fails rather than uploading a result that remains over the limit', async () => {
+    mockImageTransforms(() => new Uint8Array(2_000_001))
+    pages.set(PHOTO, () => new Response(new Uint8Array(2_000_001)))
+    await expect(postToBluesky(credentials, 'Photo', [{ url: PHOTO, alt: '' }]))
+      .rejects.toThrow('Image still exceeds the 2 MB limit after resizing')
+    expect(requests.some(request => request.url.endsWith('/com.atproto.repo.uploadBlob'))).toBe(false)
+    expect(requests.some(request => request.url.endsWith('/com.atproto.repo.createRecord'))).toBe(false)
+  })
+
+  it('does not silently publish without an oversized image when resizing is unavailable', async () => {
+    pages.set(PHOTO, () => new Response(new Uint8Array(2_000_001), { headers: { 'content-type': 'image/webp' } }))
+    await expect(postToBluesky(credentials, 'Photo', [{ url: PHOTO, alt: 'A signed book' }]))
+      .rejects.toThrow('Cannot resize Bluesky image')
+    expect(requests.some(request => request.url.endsWith('/com.atproto.repo.createRecord'))).toBe(false)
   })
 
   it('propagates posting errors from the SDK', async () => {
