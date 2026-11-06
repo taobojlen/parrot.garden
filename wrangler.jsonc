@@ -18,7 +18,8 @@
   "send_email": [{ "name": "EMAIL" }],
   "images": { "binding": "IMAGES" },
   "observability": {
-    "logs": { "enabled": true, "invocation_logs": true }
+    "enabled": false,
+    "logs": { "enabled": false, "invocation_logs": true }
   },
   "triggers": { "crons": ["*/5 * * * *"] },
   "env": {
